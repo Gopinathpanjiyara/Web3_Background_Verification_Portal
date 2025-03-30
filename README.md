@@ -1,5 +1,11 @@
 # BGV Document Verification Platform
 
+<p align="center">
+  <img src="gitimg/fr_logo.svg" alt="FR Logo" width="200" />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="gitimg/educhain.c1cc5141.svg" alt="EDU Chain Logo" width="200" />
+</p>
+
 A comprehensive background verification (BGV) platform that leverages blockchain technology to securely store and verify document authenticity. The system provides tamper-proof verification using the EDU Chain blockchain, allowing organizations to verify documents with confidence.
 
 ![BGV Platform](public/bgv-platform-screenshot.png)
