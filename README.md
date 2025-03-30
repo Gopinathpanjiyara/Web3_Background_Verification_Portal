@@ -10,30 +10,39 @@ A comprehensive background verification (BGV) platform that leverages blockchain
 
 ## Project Screenshots
 
-<details>
-  <summary>Click to see screenshots</summary>
-  
-  ### Login Screen
-  <img src="workingss/1.png" alt="Login Screen" width="800" />
-  
-  ### Dashboard
-  <img src="workingss/2.png" alt="Dashboard" width="800" />
-  
-  ### Document Verification
-  <img src="workingss/3.png" alt="Document Verification" width="800" />
-  
-  ### Blockchain Integration
-  <img src="workingss/4.png" alt="Blockchain Integration" width="800" />
-  
-  ### Results Page
-  <img src="workingss/5.png" alt="Results Page" width="800" />
-  
-  ### Document Upload
-  <img src="workingss/6.png" alt="Document Upload" width="800" />
-  
-  ### Mobile View
-  <img src="workingss/7.png" alt="Mobile View" width="400" />
-</details>
+### Login Screen
+<img src="workingss/1.png" alt="Login Screen" width="800" />
+
+### Dashboard
+<img src="workingss/2.png" alt="Dashboard" width="800" />
+
+### Document Verification
+<img src="workingss/3.png" alt="Document Verification" width="800" />
+
+### Blockchain Integration
+<img src="workingss/4.png" alt="Blockchain Integration" width="800" />
+
+### Results Page
+<img src="workingss/5.png" alt="Results Page" width="800" />
+
+### Document Upload
+<img src="workingss/6.png" alt="Document Upload" width="800" />
+
+### Mobile View
+<img src="workingss/7.png" alt="Mobile View" width="800" />
+
+## How It Works
+
+The BGV platform operates through a seamless workflow:
+
+1. **Document Upload**: Users upload documents through the intuitive interface
+2. **Hash Generation**: The system generates a unique cryptographic hash of each document
+3. **Blockchain Storage**: Document hashes are stored on the EDU Chain blockchain with timestamps
+4. **Verification**: Anyone can verify document authenticity by comparing hashes with blockchain records
+5. **Tamper Detection**: Any modification to the original document will result in a hash mismatch
+6. **Reporting**: Detailed verification reports are generated with blockchain proof
+
+This blockchain-based approach ensures documents cannot be forged or tampered with, providing a high level of trust in the verification process.
 
 ## Table of Contents
 
