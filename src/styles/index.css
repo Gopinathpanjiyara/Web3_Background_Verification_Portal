@@ -1,0 +1,276 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom theme colors extension */
+:root {
+  /* Primary theme colors */
+  --color-primary-50: #eef2ff;
+  --color-primary-100: #e0e7ff;
+  --color-primary-200: #c7d2fe;
+  --color-primary-300: #a5b4fc;
+  --color-primary-400: #818cf8;
+  --color-primary-500: #6366f1;
+  --color-primary-600: #4f46e5;
+  --color-primary-700: #4338ca;
+  --color-primary-800: #3730a3;
+  --color-primary-900: #312e81;
+  
+  /* Dark theme colors */
+  --color-dark-50: #f9fafb;
+  --color-dark-100: #f3f4f6;
+  --color-dark-200: #e5e7eb;
+  --color-dark-300: #d1d5db;
+  --color-dark-400: #9ca3af;
+  --color-dark-500: #6b7280;
+  --color-dark-600: #4b5563;
+  --color-dark-700: #374151;
+  --color-dark-800: #1f2937;
+  --color-dark-900: #111827;
+}
+
+/* Logo Filter Classes for Theme-Based Colors */
+.filter-primary-glow {
+  filter: invert(66%) sepia(48%) saturate(4462%) hue-rotate(214deg) brightness(101%) contrast(101%);
+}
+
+.filter-white-glow {
+  filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(93deg) brightness(103%) contrast(103%);
+}
+
+/* Apply custom styling to handle date inputs on dark backgrounds */
+input[type="date"] {
+  color-scheme: dark;
+}
+
+/* Apply custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-dark-800);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-dark-600);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-600);
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+@layer base {
+  body {
+    @apply bg-dark-800 text-white font-sans;
+    background-image: radial-gradient(circle at 80% 20%, rgba(0, 114, 255, 0.1), transparent 25%),
+                      radial-gradient(circle at 20% 80%, rgba(121, 40, 202, 0.05), transparent 25%);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+  }
+  
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl tracking-tight;
+    text-shadow: 0 0 40px rgba(0, 114, 255, 0.25);
+  }
+  
+  h2 {
+    @apply text-3xl md:text-4xl tracking-tight;
+    text-shadow: 0 0 30px rgba(0, 114, 255, 0.2);
+  }
+  
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+  
+  p {
+    @apply text-base md:text-lg;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-6 py-3 rounded-md font-medium transition-all duration-300;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
+    background: linear-gradient(90deg, #0072ff, #0063db);
+  }
+  
+  .btn-outline {
+    @apply border-2 border-primary-500 text-primary-500 hover:border-primary-400 hover:text-primary-400 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
+    background-color: transparent;
+  }
+  
+  .btn-secondary {
+    @apply border-2 text-white hover:bg-opacity-10 bg-opacity-5 backdrop-blur-sm shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
+    border-color: rgba(255, 255, 255, 0.1);
+    background-color: white;
+  }
+  
+  .btn-lg {
+    @apply px-8 py-4 text-lg;
+  }
+  
+  .container {
+    @apply px-4 mx-auto max-w-7xl;
+  }
+  
+  .section {
+    @apply py-16 md:py-24;
+  }
+  
+  .card {
+    @apply bg-dark-700 backdrop-blur-sm rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border;
+    background-color: rgba(55, 65, 81, 0.6);
+    border-color: rgba(75, 85, 99, 0.5);
+  }
+
+  .glass-card {
+    @apply backdrop-blur-md rounded-xl border shadow-lg;
+    background-color: rgba(55, 65, 81, 0.4);
+    border-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .gradient-text {
+    @apply text-transparent bg-clip-text;
+    background-image: linear-gradient(90deg, #0072ff, #00c6ff);
+  }
+
+  .highlight-dot {
+    @apply absolute h-2 w-2 rounded-full bg-primary-500;
+    box-shadow: 0 0 10px 2px rgba(0, 114, 255, 0.5);
+  }
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 1s ease-in-out;
+}
+
+.animate-floatUp {
+  animation: floatUp 0.8s ease-out forwards;
+}
+
+.animate-pulse-custom {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 8s ease infinite;
+}
+
+/* Registration Form Styles */
+.registration-form {
+  width: 100%;
+  max-width: 400px;
+  background-color: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin: 0 auto;
+  backdrop-filter: blur(5px);
+}
+
+/* Login Button Style */
+.login-button {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  margin: 1rem auto;
+  padding: 0.75rem 1.25rem;
+  background-color: rgb(16, 185, 129);
+  color: white;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.login-button:hover {
+  background-color: rgb(5, 150, 105);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Status messages */
+.status-message {
+  margin: 12px 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status-message.info {
+  background-color: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #93C5FD;
+}
+
+.status-message.success {
+  background-color: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #6EE7B7;
+}
+
+.status-message.error {
+  background-color: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #FCA5A5;
+} 

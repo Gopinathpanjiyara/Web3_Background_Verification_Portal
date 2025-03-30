@@ -1,0 +1,29 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Grid pattern -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M40 0H0V40" stroke="rgba(255,255,255,0.05)" stroke-width="1" fill="none" />
+  </pattern>
+  <rect width="100%" height="100%" fill="#1A1A2E" />
+  <rect width="100%" height="100%" fill="url(#grid)" />
+  
+  <!-- Abstract shapes -->
+  <circle cx="200" cy="300" r="100" fill="url(#blue-gradient)" opacity="0.1" />
+  <circle cx="1200" cy="600" r="150" fill="url(#purple-gradient)" opacity="0.07" />
+  <circle cx="700" cy="200" r="80" fill="url(#blue-gradient)" opacity="0.05" />
+  
+  <!-- Connection lines -->
+  <path d="M300 300L600 400L900 300L1200 500" stroke="rgba(0,114,255,0.1)" stroke-width="2" stroke-dasharray="10 5" />
+  <path d="M200 600L500 500L800 600L1100 500" stroke="rgba(128,90,255,0.1)" stroke-width="2" stroke-dasharray="10 5" />
+  
+  <!-- Gradients -->
+  <defs>
+    <linearGradient id="blue-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0072FF" />
+      <stop offset="100%" stop-color="#00C6FF" />
+    </linearGradient>
+    <linearGradient id="purple-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7928CA" />
+      <stop offset="100%" stop-color="#FF0080" />
+    </linearGradient>
+  </defs>
+</svg> 

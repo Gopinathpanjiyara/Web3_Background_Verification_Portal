@@ -1,0 +1,103 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+/**
+ * @title DocumentVerification
+ * @dev Smart contract to verify document authenticity on the blockchain
+ */
+contract DocumentVerification {
+    // State variables
+    address public owner;
+    
+    // Document structure
+    struct Document {
+        string documentHash;
+        uint256 timestamp;
+        address issuer;
+        bool isVerified;
+        string metadata;
+    }
+    
+    // Mapping to store documents
+    mapping(string => Document) private documents;
+    
+    // Events
+    event DocumentAdded(string indexed documentId, string documentHash, address issuer);
+    event DocumentVerified(string indexed documentId, address verifier);
+    
+    // Constructor
+    constructor() {
+        owner = msg.sender;
+    }
+    
+    // Modifiers
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can call this function");
+        _;
+    }
+    
+    /**
+     * @dev Add a new document to the blockchain
+     * @param documentId Unique identifier for the document
+     * @param documentHash Hash of the document content
+     * @param metadata Additional information about the document
+     */
+    function addDocument(string memory documentId, string memory documentHash, string memory metadata) public {
+        require(documents[documentId].timestamp == 0, "Document already exists");
+        
+        documents[documentId] = Document({
+            documentHash: documentHash,
+            timestamp: block.timestamp,
+            issuer: msg.sender,
+            isVerified: true,
+            metadata: metadata
+        });
+        
+        emit DocumentAdded(documentId, documentHash, msg.sender);
+    }
+    
+    /**
+     * @dev Verify if a document exists and matches the provided hash
+     * @param documentId ID of the document to verify
+     * @param documentHash Hash to verify against
+     * @return isValid Boolean indicating if document is valid
+     */
+    function verifyDocument(string memory documentId, string memory documentHash) public view returns (bool isValid) {
+        Document memory doc = documents[documentId];
+        
+        // Check if document exists and hash matches
+        if (doc.timestamp > 0 && keccak256(bytes(doc.documentHash)) == keccak256(bytes(documentHash))) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * @dev Get document details
+     * @param documentId ID of the document
+     * @return hash Document hash
+     * @return timestamp Time when document was added
+     * @return issuer Address of the document issuer
+     * @return isVerified Verification status
+     * @return metadata Additional document information
+     */
+    function getDocument(string memory documentId) public view returns (
+        string memory hash,
+        uint256 timestamp,
+        address issuer,
+        bool isVerified,
+        string memory metadata
+    ) {
+        Document memory doc = documents[documentId];
+        require(doc.timestamp > 0, "Document does not exist");
+        
+        return (
+            doc.documentHash,
+            doc.timestamp,
+            doc.issuer,
+            doc.isVerified,
+            doc.metadata
+        );
+    }
+} 
