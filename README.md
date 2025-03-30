@@ -9,30 +9,29 @@
 A comprehensive background verification (BGV) platform that leverages blockchain technology to securely store and verify document authenticity. The system provides tamper-proof verification using the EDU Chain blockchain, allowing organizations to verify documents with confidence.
 
 ## Project Screenshots
-
 <details>
   <summary>Click to see screenshots</summary>
   
   ### Login Screen
-  <img src="https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(9).png" alt="Login Screen" width="800" />
+  ![Login Screen](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(9).png?raw=true)
   
   ### Dashboard
-  <img src="https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(16).png" alt="Dashboard" width="800" />
+  ![Dashboard](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(16).png?raw=true)
   
   ### Document Verification
-  <img src="https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(14).png" alt="Document Verification" width="800" />
+  ![Document Verification](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(14).png?raw=true)
   
   ### Blockchain Integration
-  <img src="https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(17).png" alt="Blockchain Integration" width="800" />
+  ![Blockchain Integration](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(17).png?raw=true)
   
   ### Results Page
-  <img src="https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(18).png" alt="Results Page" width="800" />
+  ![Results Page](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(18).png?raw=true)
   
   ### Document Upload
-  <img src="https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(13).png" alt="Document Upload" width="800" />
+  ![Document Upload](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(13).png?raw=true)
   
   ### Mobile View
-  <img src="https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(21).png" alt="Mobile View" width="400" />
+  ![Mobile View](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(21).png?raw=true)
 </details>
 
 ## Table of Contents
