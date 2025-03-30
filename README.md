@@ -1,10 +1,12 @@
 # BGV Document Verification Platform
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/gitimg/fr_logo.svg" alt="FR Logo" width="200" />
+<div align="center">
+  
+  ![FR Logo](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/gitimg/fr_logo.svg)
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/gitimg/educhain.c1cc5141.svg" alt="EDU Chain Logo" width="200" />
-</p>
+  ![EDU Chain Logo](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/gitimg/educhain.c1cc5141.svg)
+  
+</div>
 
 A comprehensive background verification (BGV) platform that leverages blockchain technology to securely store and verify document authenticity. The system provides tamper-proof verification using the EDU Chain blockchain, allowing organizations to verify documents with confidence.
 
@@ -366,4 +368,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-For detailed documentation about the contract usage, see [Contract Usage Guide](src/docs/ContractUsage.md). 
+For detailed documentation about the contract usage, see [Contract Usage Guide](src/docs/ContractUsage.md).
