@@ -11,25 +11,25 @@ A comprehensive background verification (BGV) platform that leverages blockchain
 ## Project Screenshots
 
 ### Login Screen
-<img src="workingss/1.png" alt="Login Screen" width="800" />
+<img src="workingSS/1.png" alt="Login Screen" width="800" />
 
 ### Dashboard
-<img src="workingss/2.png" alt="Dashboard" width="800" />
+<img src="workingSS/2.png" alt="Dashboard" width="800" />
 
 ### Document Verification
-<img src="workingss/3.png" alt="Document Verification" width="800" />
+<img src="workingSS/3.png" alt="Document Verification" width="800" />
 
 ### Blockchain Integration
-<img src="workingss/4.png" alt="Blockchain Integration" width="800" />
+<img src="workingSS/4.png" alt="Blockchain Integration" width="800" />
 
 ### Results Page
-<img src="workingss/5.png" alt="Results Page" width="800" />
+<img src="workingSS/5.png" alt="Results Page" width="800" />
 
 ### Document Upload
-<img src="workingss/6.png" alt="Document Upload" width="800" />
+<img src="workingSS/6.png" alt="Document Upload" width="800" />
 
 ### Mobile View
-<img src="workingss/7.png" alt="Mobile View" width="800" />
+<img src="workingSS/7.png" alt="Mobile View" width="800" />
 
 ## How It Works
 
