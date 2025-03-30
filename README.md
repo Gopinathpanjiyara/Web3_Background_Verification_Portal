@@ -1,39 +1,38 @@
 # BGV Document Verification Platform
 
-<div align="center">
-  
-  ![FR Logo](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/gitimg/fr_logo.svg)
+<p align="center">
+  <img src="gitimg/fr_logo.svg" alt="FR Logo" width="200" />
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  ![EDU Chain Logo](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/gitimg/educhain.c1cc5141.svg)
-  
-</div>
+  <img src="gitimg/educhain.c1cc5141.svg" alt="EDU Chain Logo" width="200" />
+</p>
 
 A comprehensive background verification (BGV) platform that leverages blockchain technology to securely store and verify document authenticity. The system provides tamper-proof verification using the EDU Chain blockchain, allowing organizations to verify documents with confidence.
 
 ## Project Screenshots
+
 <details>
   <summary>Click to see screenshots</summary>
   
   ### Login Screen
-  ![Login Screen](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(9).png?raw=true)
+  <img src="workingss/Screenshot (9).png" alt="Login Screen" width="800" />
   
   ### Dashboard
-  ![Dashboard](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(16).png?raw=true)
+  <img src="workingss/Screenshot (16).png" alt="Dashboard" width="800" />
   
   ### Document Verification
-  ![Document Verification](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(14).png?raw=true)
+  <img src="workingss/Screenshot (14).png" alt="Document Verification" width="800" />
   
   ### Blockchain Integration
-  ![Blockchain Integration](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(17).png?raw=true)
+  <img src="workingss/Screenshot (17).png" alt="Blockchain Integration" width="800" />
   
   ### Results Page
-  ![Results Page](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(18).png?raw=true)
+  <img src="workingss/Screenshot (18).png" alt="Results Page" width="800" />
   
   ### Document Upload
-  ![Document Upload](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(13).png?raw=true)
+  <img src="workingss/Screenshot (13).png" alt="Document Upload" width="800" />
   
   ### Mobile View
-  ![Mobile View](https://raw.githubusercontent.com/Gopinathpanjiyara/First-reference-FR/main/workingss/Screenshot%20(21).png?raw=true)
+  <img src="workingss/Screenshot (21).png" alt="Mobile View" width="400" />
 </details>
 
 ## Table of Contents
@@ -368,4 +367,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-For detailed documentation about the contract usage, see [Contract Usage Guide](src/docs/ContractUsage.md).
+For detailed documentation about the contract usage, see [Contract Usage Guide](src/docs/ContractUsage.md). 
