@@ -37,13 +37,13 @@ export const CONTRACT_CONFIG = {
     sepolia: {
       chainId: 11155111,
       name: "Sepolia",
-      rpcUrl: "https://sepolia.infura.io/v3/c59b683e38bf48f3b91c89878a5e6901",
+      rpcUrl: "",
       blockExplorer: "https://sepolia.etherscan.io"
     } as NetworkConfig,
     mainnet: {
       chainId: 1,
       name: "Ethereum Mainnet",
-      rpcUrl: "https://mainnet.infura.io/v3/c59b683e38bf48f3b91c89878a5e6901",
+      rpcUrl: "",
       blockExplorer: "https://etherscan.io"
     } as NetworkConfig,
     eduChain: contractDeployment.network as NetworkConfig
