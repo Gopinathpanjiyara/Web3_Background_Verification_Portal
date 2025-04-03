@@ -24,13 +24,13 @@ export const BGV_CONTRACT_ABI = contractDeployment.abi;
 export const CONTRACT_CONFIG = {
   // Contract addresses for different networks
   addresses: {
-    sepolia: "0x5FbDB2315678afecb367f032d93F642f64180aa3", // Example address
-    mainnet: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e", // Example address
+    sepolia: "", // Example address
+    mainnet: "", // Example address
     eduChain: contractDeployment.address, // Address from deployment
   },
   
   // Infura API key for Ethereum networks
-  infuraApiKey: "c59b683e38bf48f3b91c89878a5e6901",
+  infuraApiKey: "",
   
   // Networks configuration
   networks: {
