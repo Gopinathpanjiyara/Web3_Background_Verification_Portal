@@ -20,6 +20,7 @@ app.use(cors());
 
 // Define Routes
 app.use('/api', require('./routes/auth'));
+app.use('/api', require('./routes/verifier'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/verification', require('./routes/verification'));
 app.use('/api/bgv', require('./routes/bgv'));
