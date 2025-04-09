@@ -11,9 +11,9 @@ const auth = require('../middleware/auth');
 // @access  Public
 router.post('/register', async (req, res) => {
   try {
-    const { name, phone, email, username, dob, password, userType = 'individual' } = req.body;
+    const { firstName, lastName, name, phone, email, dob, gender, password, userType = 'individual' } = req.body;
     
-    // Check if user already exists with this phone, email or username
+    // Check if user already exists with this phone or email
     const existingPhone = await User.findOne({ phone });
     if (existingPhone) {
       return res.status(400).json({ message: 'Phone number already registered' });
@@ -27,19 +27,16 @@ router.post('/register', async (req, res) => {
       }
     }
     
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      return res.status(400).json({ message: 'Username already taken' });
-    }
-    
-    // Create new user with both phone and mobile fields set to the same value
+    // Create new user
     const user = new User({
-      name,
+      firstName,
+      lastName,
+      name: name || `${firstName} ${lastName}`,
       phone,
       mobile: phone, // Explicitly set mobile field to match phone
       email,
-      username,
       dob: dob ? new Date(dob) : undefined,
+      gender,
       password, // Will be hashed in the pre-save hook
       userType
     });
@@ -57,8 +54,9 @@ router.post('/register', async (req, res) => {
     res.status(201).json({
       user: {
         id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
         name: user.name,
-        username: user.username,
         phone: user.phone,
         email: user.email,
         userType: user.userType
@@ -78,15 +76,61 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// @route   POST /api/login-password
+// @route   POST /api/check-duplicate
+// @desc    Check if a value already exists for a given field
+// @access  Public
+router.post('/check-duplicate', async (req, res) => {
+  try {
+    const { field, value } = req.body;
+    
+    if (!field || !value) {
+      return res.status(400).json({ message: 'Field and value are required' });
+    }
+    
+    // Only allow checking specific fields
+    const allowedFields = ['email', 'phone'];
+    if (!allowedFields.includes(field)) {
+      return res.status(400).json({ message: 'Invalid field for duplicate check' });
+    }
+    
+    // Create a query object that matches the field and value
+    const query = { [field]: value };
+    
+    // Check if a user exists with the given field value
+    const existingUser = await User.findOne(query);
+    
+    res.json({ exists: !!existingUser });
+  } catch (error) {
+    console.error('Check duplicate error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   POST /api/login
 // @desc    Authenticate user & get token
 // @access  Public
-router.post('/login-password', async (req, res) => {
+router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    // Check if user is logging in with email or phone
+    const { login, password } = req.body;
     
-    // Check if user exists
-    const user = await User.findOne({ username });
+    if (!login || !password) {
+      return res.status(400).json({ message: 'Please provide login credentials and password' });
+    }
+    
+    // Determine if login is email, phone, or username
+    let user;
+    if (login.includes('@')) {
+      // Login with email
+      user = await User.findOne({ email: login });
+    } else if (/^\d{10}$/.test(login)) {
+      // Login with phone number (10 digits)
+      user = await User.findOne({ phone: login });
+    } else {
+      // Login with username
+      user = await User.findOne({ username: login });
+    }
+    
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
@@ -108,8 +152,9 @@ router.post('/login-password', async (req, res) => {
     res.json({
       user: {
         id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
         name: user.name,
-        username: user.username,
         phone: user.phone,
         email: user.email,
         userType: user.userType
@@ -118,60 +163,6 @@ router.post('/login-password', async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// @route   POST /api/check-phone
-// @desc    Check if phone number exists
-// @access  Public
-router.post('/check-phone', async (req, res) => {
-  try {
-    const { phone } = req.body;
-    
-    // Find user by phone
-    const user = await User.findOne({ phone });
-    
-    if (user) {
-      return res.json({
-        exists: true,
-        username: user.username
-      });
-    }
-    
-    res.json({ exists: false });
-  } catch (error) {
-    console.error('Phone check error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// @route   POST /api/check-duplicate
-// @desc    Check if field value already exists (phone, email, username)
-// @access  Public
-router.post('/check-duplicate', async (req, res) => {
-  try {
-    const { field, value } = req.body;
-    
-    if (!field || !value) {
-      return res.status(400).json({ message: 'Field and value are required' });
-    }
-    
-    // Validate field is one of the allowed fields
-    if (!['phone', 'email', 'username'].includes(field)) {
-      return res.status(400).json({ message: 'Invalid field to check' });
-    }
-    
-    // Build query object dynamically
-    const query = {};
-    query[field] = value;
-    
-    // Check if value exists
-    const user = await User.findOne(query);
-    
-    res.json({ exists: !!user });
-  } catch (error) {
-    console.error('Duplicate check error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -229,8 +220,9 @@ router.get('/user', auth, async (req, res) => {
     
     res.json({
       id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
       name: user.name,
-      username: user.username,
       phone: user.phone,
       email: user.email,
       userType: user.userType
