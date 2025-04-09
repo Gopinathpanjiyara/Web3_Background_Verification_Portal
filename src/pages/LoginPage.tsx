@@ -159,13 +159,13 @@ const LoginPage: React.FC = () => {
       <AnimatePresence mode="wait">
         {!isInitialLoading && (
           <motion.div 
-            className="min-h-screen"
+            className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-dark-900 to-dark-800"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
             <motion.div 
-              className="flex flex-col md:flex-row min-h-screen"
+              className="flex flex-col md:flex-row md:h-[600px] items-center justify-center max-w-6xl w-full mx-auto shadow-2xl rounded-2xl overflow-hidden"
               initial="closed"
               animate="open"
               variants={{
@@ -181,7 +181,7 @@ const LoginPage: React.FC = () => {
             >
               {/* Left section (dark blue background with logo) */}
               <motion.div 
-                className="bg-dark-900 text-white w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center items-center relative overflow-hidden"
+                className="bg-dark-900 text-white w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center items-center relative overflow-hidden h-full"
                 variants={{
                   closed: { 
                     x: "-100%", 
@@ -232,7 +232,7 @@ const LoginPage: React.FC = () => {
                 />
                 
                 <motion.div 
-                  className="relative z-10 text-center max-w-lg -mt-12"
+                  className="relative z-10 text-center max-w-lg -mt-24"
                   variants={{
                     closed: { y: 40, opacity: 0 },
                     open: { 
@@ -247,7 +247,7 @@ const LoginPage: React.FC = () => {
                   }}
                 >
                   <motion.div 
-                    className="w-52 h-52 mx-auto mb-6 flex items-center justify-center"
+                    className="w-44 h-44 mx-auto mb-6 flex items-center justify-center"
                     initial={{ scale: 0.5, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ 
@@ -292,6 +292,7 @@ const LoginPage: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.6, duration: 0.5 }}
                   >
+                    {/* Temporarily disabled Organization Login
                     <Link to="/register/organization">
                       <button className="mt-6 bg-primary-600 hover:bg-primary-700 text-white py-3 px-8 rounded-lg inline-flex items-center transition-all shadow-lg">
                         <span>Organization Login</span>
@@ -300,13 +301,14 @@ const LoginPage: React.FC = () => {
                         </svg>
                       </button>
                     </Link>
+                    */}
                   </motion.div>
                 </motion.div>
               </motion.div>
               
               {/* Right section (Authentication) */}
               <motion.div 
-                className="w-full md:w-1/2 bg-dark-800 p-8 md:p-12 flex items-center justify-center"
+                className="w-full md:w-1/2 bg-dark-800 p-8 md:p-12 flex items-center justify-center rounded-r-2xl h-full"
                 variants={{
                   closed: { 
                     x: "100%", 
@@ -337,8 +339,8 @@ const LoginPage: React.FC = () => {
                     {/* Step 1: Phone number or email */}
                     {step === 'phone' && (
                       <>
-                        <h2 className="text-3xl font-bold text-primary-500 mb-2">Welcome Back</h2>
-                        <p className="text-gray-300 mb-6">Enter your phone number or email to begin</p>
+                        <h2 className="text-3xl font-bold text-primary-500 mb-2 text-center md:text-left">Welcome Back</h2>
+                        <p className="text-gray-300 mb-6 text-center md:text-left">Enter your phone number or email to begin</p>
                         
                         {error && (
                           <div className="bg-red-900/30 border border-red-800 text-red-400 p-4 rounded-lg mb-6">
@@ -372,7 +374,7 @@ const LoginPage: React.FC = () => {
                         </form>
                         
                         <div className="mt-8 text-center">
-                          <p className="text-gray-400 mb-3">Don't have an account?</p>
+                          <p className="text-gray-400 mb-1">Don't have an account?</p>
                           <Link 
                             to="/register"
                             className="w-full py-3 rounded-lg text-primary-500 font-medium hover:text-primary-400 transition-all duration-300 block"
@@ -386,8 +388,8 @@ const LoginPage: React.FC = () => {
                     {/* Step 2: Login with password */}
                     {step === 'login' && (
                       <>
-                        <h2 className="text-3xl font-bold text-primary-500 mb-2">Sign In</h2>
-                        <p className="text-gray-300 mb-6">Enter your password to continue</p>
+                        <h2 className="text-3xl font-bold text-primary-500 mb-2 text-center md:text-left">Sign In</h2>
+                        <p className="text-gray-300 mb-6 text-center md:text-left">Enter your password to continue</p>
                         
                         {error && (
                           <div className="bg-red-900/30 border border-red-800 text-red-400 p-4 rounded-lg mb-6">
