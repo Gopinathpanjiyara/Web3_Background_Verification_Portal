@@ -423,7 +423,7 @@ const IndividualRegisterPage: React.FC = () => {
                               }}
                             >
                               Other
-                            </div>
+                            </div>      
                           </div>
                         )}
                         
@@ -469,6 +469,21 @@ const IndividualRegisterPage: React.FC = () => {
                       required
                     />
                   </div>
+                  
+                  <button
+                    type="button"
+                    className="w-full py-3 mb-4 rounded-lg bg-dark-700 text-white font-semibold hover:bg-dark-600 transition-colors flex items-center relative"
+                    onClick={() => {/* TODO: Implement OCID connection */}}
+                  >
+                    <img 
+                      src="/ocid-logo.svg" 
+                      alt="OCID Logo" 
+                      className="w-6 h-6 absolute left-[calc(50%-70px)]"
+                    />
+                    <div className="flex items-center gap-1 w-full justify-center">
+                      <span className="font-normal">Link</span><span className="font-bold">OCID</span>
+                    </div>
+                  </button>
                   
                   <button
                     type="submit"
