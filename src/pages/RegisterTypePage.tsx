@@ -6,7 +6,7 @@ const RegisterTypePage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleIndividualClick = () => {
-    navigate('/register/individual');
+    navigate('/register/individual', { state: { step: 'registration' } });
   };
 
   const handleOrganizationClick = () => {

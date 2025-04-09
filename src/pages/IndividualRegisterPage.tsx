@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import OrganizationWarning from '../components/ui/OrganizationWarning';
 import axios from 'axios';
@@ -20,9 +20,12 @@ interface RegisterResponse {
 
 const IndividualRegisterPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   
-  // Step state
-  const [step, setStep] = useState<'org-check' | 'registration'>('org-check');
+  // Step state - initialize from location state if available
+  const [step, setStep] = useState<'org-check' | 'registration'>(
+    location.state?.step || 'org-check'
+  );
   
   // Organization check state
   const [showOrgWarning, setShowOrgWarning] = useState(false);
@@ -36,17 +39,30 @@ const IndividualRegisterPage: React.FC = () => {
   const [gender, setGender] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [slider, setSlider] = useState(0);
   
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
-  const [sliderVerified, setSliderVerified] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   
-  // Slider ref
-  const sliderRef = useRef<HTMLDivElement>(null);
+  // Dropdown ref for outside click handling
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Handle outside click to close dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownRef]);
 
   // Check if phone or email already exists
   const checkDuplicateEntry = async (field: string, value: string): Promise<boolean> => {
@@ -65,18 +81,6 @@ const IndividualRegisterPage: React.FC = () => {
   // Capitalize first letter of a string
   const capitalizeFirstLetter = (str: string): string => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-  };
-
-  // Handle slider verification
-  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    setSlider(value);
-    
-    if (value === 100) {
-      setSliderVerified(true);
-    } else {
-      setSliderVerified(false);
-    }
   };
 
   // Handle individual user registration
@@ -117,12 +121,6 @@ const IndividualRegisterPage: React.FC = () => {
     // Verify passwords match
     if (password !== confirmPassword) {
       setError('Passwords do not match');
-      return;
-    }
-    
-    // Check slider verification
-    if (!sliderVerified) {
-      setError('Please complete the verification slider');
       return;
     }
     
@@ -202,8 +200,8 @@ const IndividualRegisterPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Left section (dark background with logo) */}
-      <div className="bg-dark-900 text-white w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center items-center relative overflow-hidden">
+      {/* Left section (dark background with logo) - fixed */}
+      <div className="bg-dark-900 text-white w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center items-center relative overflow-hidden md:fixed md:h-screen md:left-0">
         {/* Background gradient effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary-900/20 to-dark-900 z-0"></div>
         
@@ -233,8 +231,8 @@ const IndividualRegisterPage: React.FC = () => {
         </div>
       </div>
       
-      {/* Right section (form) */}
-      <div className="w-full md:w-1/2 bg-dark-800 p-8 md:p-12 flex items-center justify-center">
+      {/* Right section (form) - scrollable */}
+      <div className="w-full md:w-1/2 bg-dark-800 p-8 md:p-12 flex items-center justify-center md:ml-[50%] min-h-screen overflow-y-auto">
         <div className="w-full max-w-md">
           <AnimatePresence mode="wait">
             {step === 'org-check' && (
@@ -267,15 +265,15 @@ const IndividualRegisterPage: React.FC = () => {
                       No, I'm an individual
                     </button>
                   </div>
-                </div>
-                
-                <div className="text-center">
-                  <Link 
-                    to="/register"
-                    className="text-primary-500 hover:text-primary-400 font-medium inline-block"
-                  >
-                    Back to Account Type Selection
-                  </Link>
+                  
+                  <div className="mt-4 text-center">
+                    <button
+                      onClick={() => setStep('registration')}
+                      className="text-primary-500 hover:text-primary-400 font-medium mt-2 inline-block"
+                    >
+                      Skip to registration form
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -386,18 +384,57 @@ const IndividualRegisterPage: React.FC = () => {
                       <label htmlFor="gender" className="block text-gray-300 text-sm mb-2">
                         Gender
                       </label>
-                      <select
-                        id="gender"
-                        value={gender}
-                        onChange={(e) => setGender(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        required
-                      >
-                        <option value="" disabled>Select gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                      </select>
+                      <div className="relative" ref={dropdownRef}>
+                        <div 
+                          className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer flex justify-between items-center"
+                          onClick={() => setDropdownOpen(!dropdownOpen)}
+                        >
+                          <span>{gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : 'Select gender'}</span>
+                          <svg className={`h-4 w-4 text-gray-400 transition-transform ${dropdownOpen ? 'transform rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                        
+                        {dropdownOpen && (
+                          <div className="absolute z-10 mt-1 w-full bg-dark-800 border border-dark-600 rounded-lg shadow-lg">
+                            <div 
+                              className="px-4 py-2 hover:bg-dark-700 cursor-pointer text-white"
+                              onClick={() => {
+                                setGender('male');
+                                setDropdownOpen(false);
+                              }}
+                            >
+                              Male
+                            </div>
+                            <div 
+                              className="px-4 py-2 hover:bg-dark-700 cursor-pointer text-white"
+                              onClick={() => {
+                                setGender('female');
+                                setDropdownOpen(false);
+                              }}
+                            >
+                              Female
+                            </div>
+                            <div 
+                              className="px-4 py-2 hover:bg-dark-700 cursor-pointer text-white"
+                              onClick={() => {
+                                setGender('other');
+                                setDropdownOpen(false);
+                              }}
+                            >
+                              Other
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Hidden input for form validation */}
+                        <input 
+                          type="hidden" 
+                          name="gender" 
+                          value={gender} 
+                          required 
+                        />
+                      </div>
                     </div>
                   </div>
                   
@@ -433,33 +470,10 @@ const IndividualRegisterPage: React.FC = () => {
                     />
                   </div>
                   
-                  <div className="mb-6">
-                    <label className="block text-gray-300 text-sm mb-2">
-                      Verification {sliderVerified && <span className="text-green-500 ml-2">✓ Verified</span>}
-                    </label>
-                    <div className="relative w-full h-12 bg-dark-700 rounded-lg overflow-hidden" ref={sliderRef}>
-                      <div 
-                        className="absolute left-0 top-0 h-full bg-primary-600/30" 
-                        style={{ width: `${slider}%` }}
-                      ></div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={slider}
-                        onChange={handleSliderChange}
-                        className="absolute w-full h-full opacity-0 cursor-pointer"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center text-white pointer-events-none">
-                        {sliderVerified ? 'Verified!' : 'Slide to verify'}
-                      </div>
-                    </div>
-                  </div>
-                  
                   <button
                     type="submit"
-                    className={`w-full py-3 rounded-lg bg-primary-500 text-white font-semibold hover:bg-primary-600 transition-colors ${isLoading || !sliderVerified ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    disabled={isLoading || !sliderVerified}
+                    className={`w-full py-3 rounded-lg bg-primary-500 text-white font-semibold hover:bg-primary-600 transition-colors ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    disabled={isLoading}
                   >
                     {isLoading ? (isCheckingDuplicate ? 'Checking information...' : 'Registering...') : 'Register & Continue'}
                   </button>
