@@ -678,29 +678,32 @@ const VerifierDashboard: React.FC = () => {
       )}
 
       {/* Navbar */}
-      <header className="bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 border-b border-dark-600 shadow-xl sticky top-0 z-30">
+      <header className="bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 border-b border-dark-600/70 shadow-xl sticky top-0 z-30 backdrop-blur-sm">
         <div className="container mx-auto px-6 py-3">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <div className="flex items-center space-x-2 mr-8">
-                <img src={logo} alt="Logo" className="h-9 w-auto" />
-                <div className="flex flex-col">
-                  <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-400 to-primary-600">Verifier Portal</span>
-                  <span className="text-xs text-gray-400">Blockchain Verification System</span>
+              <div className="flex items-center space-x-3 mr-8 group">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary-500/40 to-blue-500/40 rounded-full blur-md opacity-70 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <img src={logo} alt="Logo" className="h-10 w-auto relative z-10 transition-transform duration-300 group-hover:scale-110" />
                 </div>
-            </div>
+                <div className="flex flex-col">
+                  <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-400 to-blue-400 transition-all duration-300 group-hover:from-primary-300 group-hover:to-blue-300">Verifier Portal</span>
+                  <span className="text-xs text-gray-400 transition-colors duration-300 group-hover:text-gray-300">Blockchain Verification System</span>
+                </div>
+              </div>
             
               <nav className="hidden lg:flex">
-                <div className="flex bg-dark-700/50 backdrop-blur-sm rounded-xl p-1 shadow-inner">
-              <button
+                <div className="flex bg-dark-700/50 backdrop-blur-sm rounded-xl p-1.5 shadow-inner border border-dark-600/50">
+                  <button
                     onClick={() => {
                       setActiveTab('dashboard');
                       setShowNotifications(false);
                     }}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  activeTab === 'dashboard'
-                        ? "bg-primary-500 text-white shadow-md shadow-primary-500/20"
-                        : "text-gray-300 hover:bg-dark-600/70 hover:text-white"
+                      activeTab === 'dashboard'
+                      ? "bg-gradient-to-r from-primary-500 to-blue-500 text-white shadow-md shadow-primary-500/20 transform scale-105"
+                      : "text-gray-300 hover:bg-dark-600/70 hover:text-white"
                     }`}
                   >
                     <div className="flex items-center space-x-2">
@@ -709,16 +712,16 @@ const VerifierDashboard: React.FC = () => {
                       </svg>
                       <span>Dashboard</span>
                     </div>
-              </button>
-              <button
+                  </button>
+                  <button
                     onClick={() => {
                       setActiveTab('verification-requests');
                       setShowNotifications(false);
                     }}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  activeTab === 'verification-requests'
-                        ? "bg-primary-500 text-white shadow-md shadow-primary-500/20"
-                        : "text-gray-300 hover:bg-dark-600/70 hover:text-white"
+                      activeTab === 'verification-requests'
+                      ? "bg-gradient-to-r from-primary-500 to-blue-500 text-white shadow-md shadow-primary-500/20 transform scale-105"
+                      : "text-gray-300 hover:bg-dark-600/70 hover:text-white"
                     }`}
                   >
                     <div className="flex items-center space-x-2">
@@ -727,16 +730,16 @@ const VerifierDashboard: React.FC = () => {
                       </svg>
                       <span>Requests</span>
                     </div>
-              </button>
-              <button
+                  </button>
+                  <button
                     onClick={() => {
                       setActiveTab('verified-documents');
                       setShowNotifications(false);
                     }}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  activeTab === 'verified-documents'
-                        ? "bg-primary-500 text-white shadow-md shadow-primary-500/20"
-                        : "text-gray-300 hover:bg-dark-600/70 hover:text-white"
+                      activeTab === 'verified-documents'
+                      ? "bg-gradient-to-r from-primary-500 to-blue-500 text-white shadow-md shadow-primary-500/20 transform scale-105"
+                      : "text-gray-300 hover:bg-dark-600/70 hover:text-white"
                     }`}
                   >
                     <div className="flex items-center space-x-2">
@@ -745,16 +748,16 @@ const VerifierDashboard: React.FC = () => {
                       </svg>
                       <span>Documents</span>
                     </div>
-              </button>
-              <button
+                  </button>
+                  <button
                     onClick={() => {
                       setActiveTab('history');
                       setShowNotifications(false);
                     }}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  activeTab === 'history'
-                        ? "bg-primary-500 text-white shadow-md shadow-primary-500/20"
-                        : "text-gray-300 hover:bg-dark-600/70 hover:text-white"
+                      activeTab === 'history'
+                      ? "bg-gradient-to-r from-primary-500 to-blue-500 text-white shadow-md shadow-primary-500/20 transform scale-105"
+                      : "text-gray-300 hover:bg-dark-600/70 hover:text-white"
                     }`}
                   >
                     <div className="flex items-center space-x-2">
@@ -762,104 +765,118 @@ const VerifierDashboard: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <span>History</span>
-          </div>
-              </button>
-            <button 
+                    </div>
+                  </button>
+                  <button 
                     onClick={() => {
                       setActiveTab('notifications');
                       setShowNotifications(false);
                     }}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       activeTab === 'notifications'
-                        ? "bg-primary-500 text-white shadow-md shadow-primary-500/20"
-                        : "text-gray-300 hover:bg-dark-600/70 hover:text-white"
+                      ? "bg-gradient-to-r from-primary-500 to-blue-500 text-white shadow-md shadow-primary-500/20 transform scale-105"
+                      : "text-gray-300 hover:bg-dark-600/70 hover:text-white"
                     }`}
                   >
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 relative">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                      </svg>
                       <span>Notifications</span>
-              {unreadCount > 0 && (
-                        <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 inline-flex items-center justify-center animate-pulse">
-                  {unreadCount}
-                </span>
-              )}
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-gradient-to-br from-red-500 to-red-600 text-white text-xs font-bold rounded-full h-5 w-5 inline-flex items-center justify-center animate-pulse shadow-md shadow-red-600/20">
+                          {unreadCount}
+                        </span>
+                      )}
                     </div>
-            </button>
+                  </button>
                 </div>
               </nav>
             </div>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
+              {/* Notification bell for mobile */}
+              <button 
+                className="lg:hidden p-2 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-300 transition-colors relative"
+                onClick={() => setShowNotifications(!showNotifications)}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-gradient-to-br from-red-500 to-red-600 text-white text-xs font-bold rounded-full h-4 w-4 inline-flex items-center justify-center animate-pulse shadow-sm shadow-red-600/20">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+              
               {/* Mobile menu button */}
-              <button className="lg:hidden p-2 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-300 transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <button className="lg:hidden p-2 rounded-lg bg-gradient-to-br from-dark-700 to-dark-600 hover:from-dark-600 hover:to-dark-500 text-gray-300 transition-all shadow-md">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
               
               {/* User dropdown */}
-            <div className="relative">
-              <button 
+              <div className="relative">
+                <button 
                   onClick={() => {
                     setActiveTab('organization-profile');
                     setShowNotifications(false);
                   }}
-                  className="flex items-center space-x-2 bg-dark-700 hover:bg-dark-600 rounded-lg px-3 py-2 transition-colors"
+                  className="flex items-center space-x-3 bg-gradient-to-r from-dark-700/80 to-dark-600/80 hover:from-dark-600/80 hover:to-dark-500/80 rounded-lg px-3 py-2 transition-all shadow-md hover:shadow-lg border border-dark-500/50 hover:border-dark-400/50"
                 >
                   <div className="relative">
-                    <div className="w-8 h-8 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center text-white font-medium shadow-md shadow-primary-500/20">
-                  {user.firstName?.charAt(0) || 'V'}
-                </div>
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-dark-700"></div>
+                    <div className="absolute -inset-0.5 bg-gradient-to-br from-primary-500/50 to-blue-500/50 rounded-full blur-md opacity-70"></div>
+                    <div className="w-8 h-8 bg-gradient-to-br from-primary-400 to-blue-500 rounded-full flex items-center justify-center text-white font-medium shadow-md shadow-primary-500/20 relative ring-2 ring-dark-800">
+                      {user.firstName?.charAt(0) || 'V'}
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full ring-2 ring-dark-800"></div>
                   </div>
                   <div className="hidden md:block text-left">
                     <p className="text-sm font-medium text-white">{user.name || 'Verifier'}</p>
                     <p className="text-xs text-gray-400">Verified User</p>
                   </div>
-              </button>
-            </div>
+                </button>
+              </div>
             
               {/* Logout button */}
-            <button
+              <button
                 onClick={() => {
                   handleLogout();
                   setShowNotifications(false);
                 }}
-                className="p-2 rounded-lg bg-dark-700 hover:bg-red-600 text-gray-300 hover:text-white transition-colors"
-              aria-label="Logout"
+                className="p-2 rounded-lg bg-gradient-to-br from-dark-700/80 to-dark-600/80 hover:from-red-600/90 hover:to-red-700/90 text-gray-300 hover:text-white transition-all shadow-md hover:shadow-lg hover:shadow-red-600/20 border border-dark-500/50 hover:border-red-500/50"
+                aria-label="Logout"
                 title="Logout"
-            >
+              >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </button>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
             </div>
           </div>
           
           {/* Mobile navigation - hidden by default, shown when menu button is clicked */}
-          <div className="hidden">
-            <div className="pt-4 pb-2 border-t border-dark-600 mt-4">
-              <div className="grid grid-cols-1 gap-1">
-                <button
-                  onClick={() => {
-                    setActiveTab('dashboard');
-                    setShowNotifications(false);
-                  }}
-                  className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center space-x-3 ${
-                    activeTab === 'dashboard'
-                      ? "bg-primary-500 text-white"
-                      : "text-gray-300 hover:bg-dark-700"
-                  }`}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
-                  <span>Dashboard</span>
-                </button>
-                {/* Additional mobile menu items would go here */}
-              </div>
+          <div className="hidden lg:hidden mt-4 pt-4 border-t border-dark-600/50">
+            <div className="grid grid-cols-1 gap-1.5">
+              <button
+                onClick={() => {
+                  setActiveTab('dashboard');
+                  setShowNotifications(false);
+                }}
+                className={`px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center space-x-3 ${
+                  activeTab === 'dashboard'
+                    ? "bg-gradient-to-r from-primary-500 to-blue-500 text-white shadow-md"
+                    : "text-gray-300 hover:bg-dark-700 border border-dark-600/50"
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                <span>Dashboard</span>
+              </button>
+              {/* Additional mobile menu items would go here */}
             </div>
           </div>
         </div>

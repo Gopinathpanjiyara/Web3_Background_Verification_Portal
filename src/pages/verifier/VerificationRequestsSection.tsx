@@ -13,6 +13,15 @@ interface VerificationRequest {
   requestDetails: string;
 }
 
+interface VerificationRequestGroup {
+  requesterName: string;
+  requests: VerificationRequest[];
+  totalPending: number;
+  totalVerified: number;
+  totalRejected: number;
+  latestSubmission: string;
+}
+
 interface VerificationRequestsSectionProps {
   requests: VerificationRequest[];
   loadingRequests: boolean;
@@ -31,12 +40,14 @@ const VerificationRequestsSection: React.FC<VerificationRequestsSectionProps> = 
   refreshRequests
 }) => {
   const [filteredRequests, setFilteredRequests] = useState<VerificationRequest[]>([]);
+  const [groupedRequests, setGroupedRequests] = useState<VerificationRequestGroup[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedRequest, setSelectedRequest] = useState<VerificationRequest | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState<boolean>(false);
   const [showFullScreenDetail, setShowFullScreenDetail] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [processingRequestId, setProcessingRequestId] = useState<string | null>(null);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   // Memoize the filterRequests function with useCallback to prevent unnecessary re-creation
   const filterRequests = useCallback(() => {
@@ -58,6 +69,43 @@ const VerificationRequestsSection: React.FC<VerificationRequestsSectionProps> = 
     }
     
     setFilteredRequests(filtered);
+    
+    // Group requests by requester name
+    const grouped: Record<string, VerificationRequest[]> = {};
+    filtered.forEach(request => {
+      if (!grouped[request.requesterName]) {
+        grouped[request.requesterName] = [];
+      }
+      grouped[request.requesterName].push(request);
+    });
+    
+    // Convert to array format with additional metadata
+    const groupedArray: VerificationRequestGroup[] = Object.keys(grouped).map(name => {
+      const requestGroup = grouped[name];
+      const pending = requestGroup.filter(req => req.status === 'pending').length;
+      const verified = requestGroup.filter(req => req.status === 'verified').length;
+      const rejected = requestGroup.filter(req => req.status === 'rejected').length;
+      
+      // Find the latest submission date
+      const latestDate = requestGroup.reduce((latest, req) => {
+        const current = new Date(req.submittedDate).getTime();
+        return current > latest ? current : latest;
+      }, 0);
+      
+      return {
+        requesterName: name,
+        requests: requestGroup,
+        totalPending: pending,
+        totalVerified: verified,
+        totalRejected: rejected,
+        latestSubmission: new Date(latestDate).toISOString()
+      };
+    });
+    
+    // Sort groups by name
+    groupedArray.sort((a, b) => a.requesterName.localeCompare(b.requesterName));
+    
+    setGroupedRequests(groupedArray);
   }, [requests, statusFilter, searchTerm]);
 
   // Use the memoized filterRequests in useEffect
@@ -133,6 +181,38 @@ const VerificationRequestsSection: React.FC<VerificationRequestsSectionProps> = 
   const handleRefresh = () => {
     refreshRequests();
     toast.success('Refreshing verification requests');
+  };
+
+  const toggleGroup = (requesterName: string) => {
+    const newExpandedGroups = new Set(expandedGroups);
+    if (newExpandedGroups.has(requesterName)) {
+      newExpandedGroups.delete(requesterName);
+    } else {
+      newExpandedGroups.add(requesterName);
+    }
+    setExpandedGroups(newExpandedGroups);
+  };
+
+  // Function to format date to a more readable format
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return 'Today';
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else {
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
   };
 
   return (
@@ -223,7 +303,7 @@ const VerificationRequestsSection: React.FC<VerificationRequestsSectionProps> = 
               <div className="absolute top-0 left-0 animate-ping h-16 w-16 rounded-full bg-primary-500/10 delay-150"></div>
             </div>
           </div>
-        ) : filteredRequests.length === 0 ? (
+        ) : groupedRequests.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-60 text-gray-400">
             <div className="relative">
               <svg className="w-20 h-20 text-gray-600 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -246,129 +326,179 @@ const VerificationRequestsSection: React.FC<VerificationRequestsSectionProps> = 
           </div>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-dark-600 shadow-xl bg-gradient-to-b from-dark-800/50 to-dark-900/50">
-            <table className="min-w-full divide-y divide-dark-600/70 rounded-xl overflow-hidden">
-              <thead className="bg-gradient-to-r from-dark-800 to-dark-700">
-                <tr>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    <div className="flex items-center space-x-1">
-                      <span>Request ID</span>
-                      <svg className="w-4 h-4 text-primary-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-                      </svg>
+            <div className="min-w-full">
+              {groupedRequests.map((group, groupIndex) => (
+                <div key={group.requesterName} className="mb-4 border-b border-dark-600/40 last:border-b-0 hover:bg-dark-700/30 transition-colors">
+                  <div 
+                    className="flex flex-col md:flex-row md:items-center p-4 cursor-pointer bg-gradient-to-r from-dark-700/80 to-dark-800/80 hover:from-dark-650 hover:to-dark-750 transition-all rounded-t-lg"
+                    onClick={() => toggleGroup(group.requesterName)}
+                  >
+                    <div className="flex items-center flex-grow">
+                      <div className="mr-4 flex-shrink-0">
+                        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary-500 to-blue-600 flex items-center justify-center shadow-md transition-all transform hover:scale-110">
+                          <span className="text-base font-bold text-white">
+                            {group.requesterName.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex-grow">
+                        <div className="flex items-center space-x-2">
+                          <h3 className="font-semibold text-white text-lg">{group.requesterName}</h3>
+                          <span className="text-sm bg-dark-600 px-2 py-0.5 rounded-full text-gray-300">
+                            {group.requests.length} request{group.requests.length !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-400 flex items-center mt-1">
+                          <svg className="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          Latest: {formatDate(group.latestSubmission)}
+                        </p>
+                      </div>
                     </div>
+                    
+                    <div className="flex mt-3 md:mt-0 gap-4 items-center">
+                      <div className="flex gap-2 ml-16 md:ml-0">
+                        {group.totalPending > 0 && (
+                          <span className="px-2.5 py-1 text-xs rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 flex items-center">
+                            <span className="h-1.5 w-1.5 rounded-full bg-yellow-400 animate-pulse mr-1.5"></span>
+                            {group.totalPending} Pending
+                          </span>
+                        )}
+                        {group.totalVerified > 0 && (
+                          <span className="px-2.5 py-1 text-xs rounded-full bg-green-500/20 text-green-400 border border-green-500/30 flex items-center">
+                            <span className="h-1.5 w-1.5 rounded-full bg-green-400 mr-1.5"></span>
+                            {group.totalVerified} Verified
+                          </span>
+                        )}
+                        {group.totalRejected > 0 && (
+                          <span className="px-2.5 py-1 text-xs rounded-full bg-red-500/20 text-red-400 border border-red-500/30 flex items-center">
+                            <span className="h-1.5 w-1.5 rounded-full bg-red-400 mr-1.5"></span>
+                            {group.totalRejected} Rejected
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center ml-2 p-2 bg-dark-800 rounded-full transition-transform duration-200" style={{ transform: expandedGroups.has(group.requesterName) ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {expandedGroups.has(group.requesterName) && (
+                    <div className="overflow-x-auto border-t border-dark-600/40 bg-dark-800/40 rounded-b-lg">
+                      <table className="min-w-full divide-y divide-dark-600/40">
+                        <thead className="bg-gradient-to-r from-dark-800 to-dark-700">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                              <div className="flex items-center space-x-1">
+                                <span>Request ID</span>
+                                <svg className="w-4 h-4 text-primary-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                                </svg>
+                              </div>
                   </th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Requester
-                  </th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Document Type
                   </th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Submitted Date
                   </th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Status
                   </th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-dark-600/40 bg-dark-800/10">
-                {filteredRequests.map((request, index) => (
-                  <tr 
-                    key={request.id} 
-                    className={`hover:bg-dark-600/40 backdrop-blur-sm transition-all duration-200 cursor-pointer hover:shadow-lg hover:shadow-primary-500/5 border-l-0 hover:border-l-[3px] hover:border-primary-500 group ${index % 2 === 0 ? 'bg-dark-800/20' : 'bg-transparent'}`}
-                    onClick={() => openFullScreenDetail(request)}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
-                      <div className="text-primary-300 group-hover:text-primary-200 transition-colors">
+                        <tbody className="divide-y divide-dark-600/40 bg-dark-800/10">
+                          {group.requests.map((request, requestIndex) => (
+                            <tr 
+                              key={request.id} 
+                              className={`hover:bg-dark-600/40 backdrop-blur-sm transition-all duration-200 cursor-pointer hover:shadow-lg hover:shadow-primary-500/5 border-l-0 hover:border-l-[3px] hover:border-primary-500 group ${requestIndex % 2 === 0 ? 'bg-dark-800/20' : 'bg-transparent'}`}
+                              onClick={() => openFullScreenDetail(request)}
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
+                                <div className="text-primary-300 group-hover:text-primary-200 transition-colors">
                       {request.id}
-                      </div>
+                                </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      <div className="flex items-center">
-                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary-500 to-blue-600 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all transform group-hover:scale-110 mr-3">
-                          <span className="text-xs font-bold text-white">
-                            {request.requesterName.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <span className="group-hover:text-white transition-colors">{request.requesterName}</span>
-                      </div>
+                                <div className="flex items-center">
+                                  <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-500 shadow-md shadow-blue-500/20 group-hover:shadow-blue-500/40 group-hover:scale-125 transition-all mr-2"></div>
+                                  <span className="group-hover:text-white transition-colors">{request.documentType}</span>
+                                </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      <div className="flex items-center">
-                        <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-500 shadow-md shadow-blue-500/20 group-hover:shadow-blue-500/40 group-hover:scale-125 transition-all mr-2"></div>
-                        <span className="group-hover:text-white transition-colors">{request.documentType}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      <div className="flex items-center">
-                        <svg className="w-4 h-4 mr-2 text-gray-400 group-hover:text-primary-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span className="group-hover:text-white transition-colors">{request.submittedDate}</span>
-                      </div>
+                                <div className="flex items-center">
+                                  <svg className="w-4 h-4 mr-2 text-gray-400 group-hover:text-primary-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                  <span className="group-hover:text-white transition-colors">{formatDate(request.submittedDate)}</span>
+                                </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {request.status === 'pending' && (
-                        <span className="px-3 py-1.5 text-xs font-semibold rounded-full bg-gradient-to-r from-yellow-500/20 to-amber-500/10 text-yellow-400 border border-yellow-500/30 inline-flex items-center shadow-sm shadow-yellow-500/10 group-hover:shadow-yellow-500/20 transition-all">
-                          <span className="h-1.5 w-1.5 rounded-full bg-yellow-400 animate-pulse mr-1.5"></span>
+                                  <span className="px-3 py-1.5 text-xs font-semibold rounded-full bg-gradient-to-r from-yellow-500/20 to-amber-500/10 text-yellow-400 border border-yellow-500/30 inline-flex items-center shadow-sm shadow-yellow-500/10 group-hover:shadow-yellow-500/20 transition-all">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-yellow-400 animate-pulse mr-1.5"></span>
                           Pending
                         </span>
                       )}
                       {request.status === 'verified' && (
-                        <span className="px-3 py-1.5 text-xs font-semibold rounded-full bg-gradient-to-r from-green-500/20 to-emerald-500/10 text-green-400 border border-green-500/30 inline-flex items-center shadow-sm shadow-green-500/10 group-hover:shadow-green-500/20 transition-all">
-                          <span className="h-1.5 w-1.5 rounded-full bg-green-400 mr-1.5"></span>
+                                  <span className="px-3 py-1.5 text-xs font-semibold rounded-full bg-gradient-to-r from-green-500/20 to-emerald-500/10 text-green-400 border border-green-500/30 inline-flex items-center shadow-sm shadow-green-500/10 group-hover:shadow-green-500/20 transition-all">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-green-400 mr-1.5"></span>
                           Verified
                         </span>
                       )}
                       {request.status === 'rejected' && (
-                        <span className="px-3 py-1.5 text-xs font-semibold rounded-full bg-gradient-to-r from-red-500/20 to-rose-500/10 text-red-400 border border-red-500/30 inline-flex items-center shadow-sm shadow-red-500/10 group-hover:shadow-red-500/20 transition-all">
-                          <span className="h-1.5 w-1.5 rounded-full bg-red-400 mr-1.5"></span>
+                                  <span className="px-3 py-1.5 text-xs font-semibold rounded-full bg-gradient-to-r from-red-500/20 to-rose-500/10 text-red-400 border border-red-500/30 inline-flex items-center shadow-sm shadow-red-500/10 group-hover:shadow-red-500/20 transition-all">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-red-400 mr-1.5"></span>
                           Rejected
                         </span>
                       )}
                     </td>
-                    <td 
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-300"
-                      onClick={(e) => e.stopPropagation()} // Prevent row click when clicking on action buttons
-                    >
+                              <td 
+                                className="px-6 py-4 whitespace-nowrap text-sm text-gray-300"
+                                onClick={(e) => e.stopPropagation()} // Prevent row click when clicking on action buttons
+                              >
                       <div className="flex space-x-3">
                         {request.status === 'pending' && (
                           <>
                             <button 
-                              onClick={() => handleReviewRequest(request.id)}
-                              className="text-blue-400 hover:text-blue-300 transition-all p-2 rounded-full hover:bg-blue-500/20 hover:shadow-md hover:shadow-blue-500/10 transform hover:scale-110"
+                                        onClick={() => handleReviewRequest(request.id)}
+                                        className="text-blue-400 hover:text-blue-300 transition-all p-2 rounded-full hover:bg-blue-500/20 hover:shadow-md hover:shadow-blue-500/10 transform hover:scale-110"
                               title="Review"
-                              aria-label="Mark for review"
-                              disabled={processingRequestId === request.id}
+                                        aria-label="Mark for review"
+                                        disabled={processingRequestId === request.id}
                             >
-                              <svg className={`w-5 h-5 ${processingRequestId === request.id ? 'animate-pulse' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <svg className={`w-5 h-5 ${processingRequestId === request.id ? 'animate-pulse' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                               </svg>
                             </button>
                             
                             <button 
-                              onClick={() => handleApproveRequest(request.id)}
-                              className="text-green-400 hover:text-green-300 transition-all p-2 rounded-full hover:bg-green-500/20 hover:shadow-md hover:shadow-green-500/10 transform hover:scale-110"
+                                        onClick={() => handleApproveRequest(request.id)}
+                                        className="text-green-400 hover:text-green-300 transition-all p-2 rounded-full hover:bg-green-500/20 hover:shadow-md hover:shadow-green-500/10 transform hover:scale-110"
                               title="Approve"
-                              aria-label="Approve request"
-                              disabled={processingRequestId === request.id}
+                                        aria-label="Approve request"
+                                        disabled={processingRequestId === request.id}
                             >
-                              <svg className={`w-5 h-5 ${processingRequestId === request.id ? 'animate-pulse' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <svg className={`w-5 h-5 ${processingRequestId === request.id ? 'animate-pulse' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
                             </button>
                             
                             <button 
-                              onClick={() => handleRejectRequest(request.id)}
-                              className="text-red-400 hover:text-red-300 transition-all p-2 rounded-full hover:bg-red-500/20 hover:shadow-md hover:shadow-red-500/10 transform hover:scale-110"
+                                        onClick={() => handleRejectRequest(request.id)}
+                                        className="text-red-400 hover:text-red-300 transition-all p-2 rounded-full hover:bg-red-500/20 hover:shadow-md hover:shadow-red-500/10 transform hover:scale-110"
                               title="Reject"
-                              aria-label="Reject request"
-                              disabled={processingRequestId === request.id}
+                                        aria-label="Reject request"
+                                        disabled={processingRequestId === request.id}
                             >
-                              <svg className={`w-5 h-5 ${processingRequestId === request.id ? 'animate-pulse' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <svg className={`w-5 h-5 ${processingRequestId === request.id ? 'animate-pulse' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                               </svg>
                             </button>
@@ -383,7 +513,12 @@ const VerificationRequestsSection: React.FC<VerificationRequestsSectionProps> = 
           </div>
         )}
       </div>
-      
+              ))}
+              </div>
+              </div>
+        )}
+              </div>
+              
       {/* Full Screen Detail View */}
       <AnimatePresence>
         {showFullScreenDetail && selectedRequest && (
