@@ -5,7 +5,7 @@ import axios from 'axios';
 import LoadingScreen from '../components/ui/LoadingScreen';
 
 // API URL
-const API_URL = 'http://localhost:5001/api';
+const API_URL = 'http://localhost:5002/api';
 
 // Define interface for API responses
 interface PhoneCheckResponse {
@@ -16,8 +16,9 @@ interface PhoneCheckResponse {
 interface LoginResponse {
   user: {
     id: string;
+    firstName: string;
+    lastName: string;
     name: string;
-    username: string;
     [key: string]: any;
   };
   token: string;
@@ -31,22 +32,18 @@ const LoginPage: React.FC = () => {
   const tagline = "Hire so you don't have to fire";
   
   // Auth flow state
-  const [step, setStep] = useState<'phone' | 'login' | 'register'>('phone');
+  const [step, setStep] = useState<'phone' | 'login'>('phone');
   
   // User data
   const [phone, setPhone] = useState('');
-  const [username, setUsername] = useState('');
+  const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [dob, setDob] = useState('');
   
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
-  const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
 
   // Initial loading effect
   useEffect(() => {
@@ -57,36 +54,42 @@ const LoginPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // First step: Validate phone number
+  // First step: Validate phone/email
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
     
-    // Basic validation for phone number (must be 10 digits)
-    if (!/^\d{10}$/.test(phone)) {
-      setError('Please enter a valid 10-digit phone number');
+    // Basic validation for phone number or email
+    if (!/^\d{10}$/.test(phone) && !/\S+@\S+\.\S+/.test(phone)) {
+      setError('Please enter a valid 10-digit phone number or email address');
       return;
     }
     
     setIsLoading(true);
     
     try {
-      // Check if phone exists in the database
-      const response = await axios.post<PhoneCheckResponse>(`${API_URL}/check-phone`, { phone });
+      // Check if the phone/email exists in the database
+      const response = await axios.post<{exists: boolean}>(`${API_URL}/check-duplicate`, {
+        field: phone.includes('@') ? 'email' : 'phone',
+        value: phone
+      });
       
-      if (response.data.exists) {
-        // Phone exists, move to login step
-        setUsername(response.data.username || '');
-        setStep('login');
-        setSuccess('Phone number found! Please continue to login.');
-      } else {
-        // Phone doesn't exist, show error message
-        setError('No account found with this phone number. Please register first.');
+      if (!response.data.exists) {
+        setError('No account found with this phone number or email. Please register first.');
+        setIsLoading(false);
+        return;
       }
+      
+      // Set the login value based on phone input
+      setLogin(phone);
+      setSuccess('Account found! Please enter your password.');
+      
+      // Move to login step
+      setStep('login');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error checking phone number. Please try again.');
-      console.error('Phone check error:', err);
+      setError(err.response?.data?.message || 'Error verifying account. Please try again.');
+      console.error('Account verification error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -97,16 +100,16 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     setError(null);
     
-    if (!username || !password) {
-      setError('Please enter both username and password');
+    if (!login || !password) {
+      setError('Please enter both login credentials and password');
       return;
     }
     
     setIsLoading(true);
     
     try {
-      const response = await axios.post<LoginResponse>(`${API_URL}/login-password`, { 
-        username, 
+      const response = await axios.post<LoginResponse>(`${API_URL}/login`, { 
+        login, 
         password 
       });
       
@@ -132,112 +135,9 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  // Check if email, phone or username already exists
-  const checkDuplicateEntry = async (field: string, value: string): Promise<boolean> => {
-    try {
-      const response = await axios.post<{exists: boolean}>(`${API_URL}/check-duplicate`, {
-        field,
-        value
-      });
-      return response.data.exists;
-    } catch (err) {
-      console.error(`Error checking duplicate ${field}:`, err);
-      return false;
-    }
-  };
-
-  // Handle user registration
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
-    
-    // Validate required fields
-    if (!name || !phone || !username || !password || !email || !dob) {
-      setError('Please fill in all required fields');
-      return;
-    }
-    
-    // Validate phone format (10 digits)
-    if (!/^\d{10}$/.test(phone)) {
-      setError('Phone number must be 10 digits');
-      return;
-    }
-    
-    // Validate email format
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
-    
-    setIsLoading(true);
-    setIsCheckingDuplicate(true);
-    
-    try {
-      // Check for duplicate entries
-      const isDuplicatePhone = await checkDuplicateEntry('phone', phone);
-      if (isDuplicatePhone) {
-        setError('This phone number is already registered. Please use a different phone number.');
-        setIsLoading(false);
-        setIsCheckingDuplicate(false);
-        return;
-      }
-      
-      const isDuplicateEmail = await checkDuplicateEntry('email', email);
-      if (isDuplicateEmail) {
-        setError('This email is already registered. Please use a different email address.');
-        setIsLoading(false);
-        setIsCheckingDuplicate(false);
-        return;
-      }
-      
-      const isDuplicateUsername = await checkDuplicateEntry('username', username);
-      if (isDuplicateUsername) {
-        setError('This username is already taken. Please choose a different username.');
-        setIsLoading(false);
-        setIsCheckingDuplicate(false);
-        return;
-      }
-      
-      setIsCheckingDuplicate(false);
-      
-      // Register user in database
-      const response = await axios.post<LoginResponse>(`${API_URL}/register`, {
-        name,
-        phone,
-        email,
-        username,
-        dob,
-        password,
-      });
-      
-      setSuccess('Registration successful! You may now login.');
-      
-      // Store the returned username
-      setUsername(response.data.user.username);
-      
-      // After successful registration, go back to login step
-      setTimeout(() => {
-        setStep('login');
-      }, 1500);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
-      console.error('Registration error:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // Go back to phone entry
   const handleBack = () => {
     setStep('phone');
-    setError(null);
-    setSuccess(null);
-  };
-
-  // Go to registration form directly
-  const goToRegister = () => {
-    setStep('register');
     setError(null);
     setSuccess(null);
   };
@@ -434,11 +334,11 @@ const LoginPage: React.FC = () => {
                     transition={{ duration: 0.6, delay: 1 }}
                     className="w-full"
                   >
-                    {/* Step 1: Phone number check */}
+                    {/* Step 1: Phone number or email */}
                     {step === 'phone' && (
                       <>
                         <h2 className="text-3xl font-bold text-primary-500 mb-2">Welcome Back</h2>
-                        <p className="text-gray-300 mb-6">Enter your phone number to begin</p>
+                        <p className="text-gray-300 mb-6">Enter your phone number or email to begin</p>
                         
                         {error && (
                           <div className="bg-red-900/30 border border-red-800 text-red-400 p-4 rounded-lg mb-6">
@@ -449,17 +349,15 @@ const LoginPage: React.FC = () => {
                         <form onSubmit={handlePhoneSubmit}>
                           <div className="mb-4">
                             <label htmlFor="phone" className="block text-gray-300 text-sm mb-2">
-                              Phone Number
+                              Phone Number or Email
                             </label>
                             <input
-                              type="tel"
+                              type="text"
                               id="phone"
                               value={phone}
                               onChange={(e) => setPhone(e.target.value)}
                               className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                              placeholder="10-digit phone number"
-                              pattern="[0-9]{10}"
-                              maxLength={10}
+                              placeholder="Enter your phone or email"
                               required
                             />
                           </div>
@@ -489,7 +387,7 @@ const LoginPage: React.FC = () => {
                     {step === 'login' && (
                       <>
                         <h2 className="text-3xl font-bold text-primary-500 mb-2">Sign In</h2>
-                        <p className="text-gray-300 mb-6">Welcome back, please sign in to your account</p>
+                        <p className="text-gray-300 mb-6">Enter your password to continue</p>
                         
                         {error && (
                           <div className="bg-red-900/30 border border-red-800 text-red-400 p-4 rounded-lg mb-6">
@@ -504,6 +402,12 @@ const LoginPage: React.FC = () => {
                         )}
                         
                         <form onSubmit={handlePasswordLogin}>
+                          <div className="mb-2">
+                            <p className="text-gray-400 text-sm mb-4">
+                              Signing in with: <span className="text-white font-medium">{login}</span>
+                            </p>
+                          </div>
+                          
                           <div className="mb-4">
                             <label htmlFor="password" className="block text-gray-300 text-sm mb-2">
                               Password
@@ -516,6 +420,7 @@ const LoginPage: React.FC = () => {
                               className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                               placeholder="Enter your password"
                               required
+                              autoFocus
                             />
                           </div>
                           
@@ -539,113 +444,6 @@ const LoginPage: React.FC = () => {
                             Back
                           </button>
                         </div>
-                      </>
-                    )}
-                    
-                    {/* Step 3: Registration */}
-                    {step === 'register' && (
-                      <>
-                        <h2 className="text-3xl font-bold text-primary-500 mb-2">Create Account</h2>
-                        <p className="text-gray-300 mb-6">Complete your profile information</p>
-                        
-                        {error && (
-                          <div className="bg-red-900/30 border border-red-800 text-red-400 p-4 rounded-lg mb-6">
-                            {error}
-                          </div>
-                        )}
-                        
-                        {success && (
-                          <div className="bg-green-900/30 border border-green-800 text-green-400 p-4 rounded-lg mb-6">
-                            {success}
-                          </div>
-                        )}
-                        
-                        <form onSubmit={handleRegister}>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                              <label htmlFor="firstName" className="block text-gray-300 text-sm mb-2">
-                                First Name
-                              </label>
-                              <input
-                                type="text"
-                                id="firstName"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                placeholder="First name"
-                                required
-                              />
-                            </div>
-                            <div>
-                              <label htmlFor="lastName" className="block text-gray-300 text-sm mb-2">
-                                Last Name
-                              </label>
-                              <input
-                                type="text"
-                                id="lastName"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                placeholder="Last name"
-                                required
-                              />
-                            </div>
-                          </div>
-                          
-                          <div className="mb-4">
-                            <label htmlFor="email" className="block text-gray-300 text-sm mb-2">
-                              Email Address
-                            </label>
-                            <input
-                              type="email"
-                              id="email"
-                              value={email}
-                              onChange={(e) => setEmail(e.target.value)}
-                              className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                              placeholder="your@email.com"
-                              required
-                            />
-                          </div>
-                          
-                          <div className="mb-4">
-                            <label htmlFor="dob" className="block text-gray-300 text-sm mb-2">
-                              Date of Birth
-                            </label>
-                            <input
-                              type="date"
-                              id="dob"
-                              value={dob}
-                              onChange={(e) => setDob(e.target.value)}
-                              className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                              required
-                            />
-                          </div>
-                          
-                          <div className="mb-6">
-                            <label htmlFor="registerPassword" className="block text-gray-300 text-sm mb-2">
-                              Password
-                            </label>
-                            <input
-                              type="password"
-                              id="registerPassword"
-                              value={password}
-                              onChange={(e) => setPassword(e.target.value)}
-                              className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                              placeholder="Create a secure password"
-                              minLength={8}
-                              required
-                            />
-                            <p className="text-gray-400 text-xs mt-1">Password must be at least 8 characters</p>
-                          </div>
-                          
-                          <button
-                            type="submit"
-                            className={`w-full py-3 rounded-lg bg-primary-500 text-white font-medium hover:bg-primary-600 transition-colors ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                            disabled={isLoading}
-                          >
-                            {isLoading ? (isCheckingDuplicate ? 'Checking information...' : 'Creating Account...') : 'Register & Continue'}
-                          </button>
-                        </form>
                       </>
                     )}
                   </motion.div>

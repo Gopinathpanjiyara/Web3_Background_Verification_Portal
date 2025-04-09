@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import OrganizationWarning from '../components/ui/OrganizationWarning';
 import axios from 'axios';
 
 // API URL
-const API_URL = 'http://localhost:5001/api';
+const API_URL = 'http://localhost:5002/api';
 
 // Define interface for API responses
 interface RegisterResponse {
   success: boolean;
   user: {
     id: string;
-    name: string;
-    username: string;
+    firstName: string;
+    lastName: string;
     [key: string]: any;
   };
 }
@@ -29,19 +29,26 @@ const IndividualRegisterPage: React.FC = () => {
   
   // User data
   const [phone, setPhone] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [dob, setDob] = useState('');
+  const [gender, setGender] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [slider, setSlider] = useState(0);
   
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
+  const [sliderVerified, setSliderVerified] = useState(false);
+  
+  // Slider ref
+  const sliderRef = useRef<HTMLDivElement>(null);
 
-  // Check if phone, email or username already exists
+  // Check if phone or email already exists
   const checkDuplicateEntry = async (field: string, value: string): Promise<boolean> => {
     try {
       const response = await axios.post<{exists: boolean}>(`${API_URL}/check-duplicate`, {
@@ -55,6 +62,23 @@ const IndividualRegisterPage: React.FC = () => {
     }
   };
 
+  // Capitalize first letter of a string
+  const capitalizeFirstLetter = (str: string): string => {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  };
+
+  // Handle slider verification
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    setSlider(value);
+    
+    if (value === 100) {
+      setSliderVerified(true);
+    } else {
+      setSliderVerified(false);
+    }
+  };
+
   // Handle individual user registration
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +86,7 @@ const IndividualRegisterPage: React.FC = () => {
     setSuccess(null);
     
     // Validate required fields
-    if (!name || !phone || !username || !password || !email || !dob) {
+    if (!firstName || !lastName || !phone || !email || !dob || !gender || !password || !confirmPassword) {
       setError('Please fill in all required fields');
       return;
     }
@@ -76,6 +100,29 @@ const IndividualRegisterPage: React.FC = () => {
     // Validate email format
     if (!/\S+@\S+\.\S+/.test(email)) {
       setError('Please enter a valid email address');
+      return;
+    }
+    
+    // Validate first and last name start with a capital letter
+    if (firstName.charAt(0) !== firstName.charAt(0).toUpperCase()) {
+      setError('First name should start with a capital letter');
+      return;
+    }
+    
+    if (lastName.charAt(0) !== lastName.charAt(0).toUpperCase()) {
+      setError('Last name should start with a capital letter');
+      return;
+    }
+    
+    // Verify passwords match
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    
+    // Check slider verification
+    if (!sliderVerified) {
+      setError('Please complete the verification slider');
       return;
     }
     
@@ -100,23 +147,20 @@ const IndividualRegisterPage: React.FC = () => {
         return;
       }
       
-      const isDuplicateUsername = await checkDuplicateEntry('username', username);
-      if (isDuplicateUsername) {
-        setError('This username is already taken. Please choose a different username.');
-        setIsLoading(false);
-        setIsCheckingDuplicate(false);
-        return;
-      }
-      
       setIsCheckingDuplicate(false);
+      
+      // Create full name from first and last name
+      const fullName = `${firstName} ${lastName}`;
       
       // Register user in database
       const response = await axios.post<RegisterResponse>(`${API_URL}/register`, {
-        name,
+        firstName,
+        lastName,
+        name: fullName,
         phone,
         email,
-        username,
         dob,
+        gender,
         password,
       });
       
@@ -261,19 +305,35 @@ const IndividualRegisterPage: React.FC = () => {
                 )}
                 
                 <form onSubmit={handleRegister}>
-                  <div className="mb-4">
-                    <label htmlFor="name" className="block text-gray-300 text-sm mb-2">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      placeholder="Enter your full name"
-                      required
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label htmlFor="firstName" className="block text-gray-300 text-sm mb-2">
+                        First Name
+                      </label>
+                      <input
+                        type="text"
+                        id="firstName"
+                        value={firstName}
+                        onChange={(e) => setFirstName(capitalizeFirstLetter(e.target.value))}
+                        className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="First name"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="lastName" className="block text-gray-300 text-sm mb-2">
+                        Last Name
+                      </label>
+                      <input
+                        type="text"
+                        id="lastName"
+                        value={lastName}
+                        onChange={(e) => setLastName(capitalizeFirstLetter(e.target.value))}
+                        className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="Last name"
+                        required
+                      />
+                    </div>
                   </div>
                   
                   <div className="mb-4">
@@ -308,36 +368,40 @@ const IndividualRegisterPage: React.FC = () => {
                     />
                   </div>
                   
-                  <div className="mb-4">
-                    <label htmlFor="username" className="block text-gray-300 text-sm mb-2">
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      id="username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      placeholder="Choose a username"
-                      required
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label htmlFor="dob" className="block text-gray-300 text-sm mb-2">
+                        Date of Birth
+                      </label>
+                      <input
+                        type="date"
+                        id="dob"
+                        value={dob}
+                        onChange={(e) => setDob(e.target.value)}
+                        className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="gender" className="block text-gray-300 text-sm mb-2">
+                        Gender
+                      </label>
+                      <select
+                        id="gender"
+                        value={gender}
+                        onChange={(e) => setGender(e.target.value)}
+                        className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        required
+                      >
+                        <option value="" disabled>Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
                   </div>
                   
                   <div className="mb-4">
-                    <label htmlFor="dob" className="block text-gray-300 text-sm mb-2">
-                      Date of Birth
-                    </label>
-                    <input
-                      type="date"
-                      id="dob"
-                      value={dob}
-                      onChange={(e) => setDob(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="mb-6">
                     <label htmlFor="reg-password" className="block text-gray-300 text-sm mb-2">
                       Password
                     </label>
@@ -353,10 +417,49 @@ const IndividualRegisterPage: React.FC = () => {
                     />
                   </div>
                   
+                  <div className="mb-4">
+                    <label htmlFor="confirm-password" className="block text-gray-300 text-sm mb-2">
+                      Confirm Password
+                    </label>
+                    <input
+                      type="password"
+                      id="confirm-password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder="Confirm your password"
+                      minLength={6}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="mb-6">
+                    <label className="block text-gray-300 text-sm mb-2">
+                      Verification {sliderVerified && <span className="text-green-500 ml-2">✓ Verified</span>}
+                    </label>
+                    <div className="relative w-full h-12 bg-dark-700 rounded-lg overflow-hidden" ref={sliderRef}>
+                      <div 
+                        className="absolute left-0 top-0 h-full bg-primary-600/30" 
+                        style={{ width: `${slider}%` }}
+                      ></div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={slider}
+                        onChange={handleSliderChange}
+                        className="absolute w-full h-full opacity-0 cursor-pointer"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center text-white pointer-events-none">
+                        {sliderVerified ? 'Verified!' : 'Slide to verify'}
+                      </div>
+                    </div>
+                  </div>
+                  
                   <button
                     type="submit"
-                    className={`w-full py-3 rounded-lg bg-primary-500 text-white font-semibold hover:bg-primary-600 transition-colors ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    disabled={isLoading}
+                    className={`w-full py-3 rounded-lg bg-primary-500 text-white font-semibold hover:bg-primary-600 transition-colors ${isLoading || !sliderVerified ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    disabled={isLoading || !sliderVerified}
                   >
                     {isLoading ? (isCheckingDuplicate ? 'Checking information...' : 'Registering...') : 'Register & Continue'}
                   </button>

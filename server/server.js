@@ -7,7 +7,12 @@ require('dotenv').config();
 const app = express();
 
 // Connect to MongoDB
-connectDB();
+try {
+  connectDB();
+  console.log('Trying to connect to MongoDB...');
+} catch (err) {
+  console.error('Could not connect to MongoDB, but continuing anyway:', err.message);
+}
 
 // Middleware
 app.use(express.json());
