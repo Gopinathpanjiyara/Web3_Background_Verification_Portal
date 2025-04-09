@@ -148,58 +148,95 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3 }}
-            className="relative bg-dark-700 rounded-xl p-6 shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto z-50"
+            className="relative bg-gradient-to-b from-dark-700 to-dark-800 rounded-xl p-6 shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto z-50 border border-dark-500"
           >
             <button 
               onClick={closeDocumentModal}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors bg-dark-800/80 hover:bg-dark-700 p-2 rounded-full"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
-            <h3 className="text-xl font-bold mb-4">{selectedDocument.documentType}</h3>
+            <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-primary-400 to-blue-400 bg-clip-text text-transparent">{selectedDocument.documentType}</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <img 
-                  src={selectedDocument.documentUrl} 
-                  alt={`${selectedDocument.documentType} preview`} 
-                  className="w-full rounded-lg shadow-md mb-4 bg-dark-800 object-contain max-h-80"
-                />
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="bg-dark-900/50 p-1 rounded-lg shadow-xl border border-dark-600 overflow-hidden mb-4 transform hover:scale-[1.02] transition-all duration-300 hover:shadow-primary-500/10">
+                  <img 
+                    src={selectedDocument.documentUrl} 
+                    alt={`${selectedDocument.documentType} preview`} 
+                    className="w-full rounded-md shadow-inner object-contain max-h-80"
+                  />
+                </div>
                 
-                <div className="bg-dark-800 p-4 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-400 mb-2">Certificate Details</h4>
-                  <p className="text-sm mb-1"><span className="text-gray-400">ID:</span> {selectedDocument.certificationId}</p>
-                  <p className="text-sm mb-1"><span className="text-gray-400">Owner:</span> {selectedDocument.ownerName}</p>
-                  <p className="text-sm mb-1"><span className="text-gray-400">Verified:</span> {formatDate(selectedDocument.verifiedDate)}</p>
+                <div className="bg-dark-800 p-4 rounded-lg shadow-lg border border-dark-600">
+                  <h4 className="text-sm font-medium text-gray-400 mb-2 flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Certificate Details
+                  </h4>
+                  <div className="divide-y divide-dark-600">
+                    <div className="py-2">
+                      <p className="text-sm"><span className="text-gray-400">ID:</span> <span className="font-mono font-medium text-primary-300">{selectedDocument.certificationId}</span></p>
+                    </div>
+                    <div className="py-2">
+                      <p className="text-sm"><span className="text-gray-400">Owner:</span> <span className="font-medium">{selectedDocument.ownerName}</span></p>
+                    </div>
+                    <div className="py-2">
+                      <p className="text-sm"><span className="text-gray-400">Verified:</span> <span className="font-medium">{formatDate(selectedDocument.verifiedDate)}</span></p>
+                    </div>
+                  </div>
+                  
                   {selectedDocument.blockchainTxHash && (
-                    <div className="mt-3">
-                      <p className="text-sm mb-1"><span className="text-gray-400">Blockchain Verification:</span></p>
-                      <a 
-                        href={`https://etherscan.io/tx/${selectedDocument.blockchainTxHash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-400 hover:text-primary-300 transition-colors flex items-center text-sm"
-                      >
-                        <span className="font-mono break-all">{selectedDocument.blockchainTxHash}</span>
-                        <svg className="w-4 h-4 ml-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    <div className="mt-3 pt-3 border-t border-dark-600">
+                      <p className="text-sm mb-1 flex items-center">
+                        <svg className="w-4 h-4 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
-                      </a>
+                        <span className="text-gray-400">Blockchain Verification:</span>
+                      </p>
+                      <div className="bg-dark-900/70 rounded-lg p-2 font-mono text-sm hover:bg-dark-900 transition-colors">
+                        <a 
+                          href={`https://etherscan.io/tx/${selectedDocument.blockchainTxHash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary-400 hover:text-primary-300 transition-colors flex items-center justify-between group"
+                        >
+                          <span className="break-all">{selectedDocument.blockchainTxHash}</span>
+                          <svg className="w-4 h-4 ml-1 flex-shrink-0 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
+                      </div>
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
               
-              <div className="space-y-4">
-                <div className="bg-dark-800 p-4 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-400 mb-2">Actions</h4>
-                  <div className="space-y-2">
+              <motion.div 
+                className="space-y-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+              >
+                <div className="bg-dark-800 p-4 rounded-lg shadow-lg border border-dark-600">
+                  <h4 className="text-sm font-medium text-gray-400 mb-2 flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Actions
+                  </h4>
+                  <div className="space-y-3">
                     <button 
                       onClick={() => viewDocumentCertificate(selectedDocument.id)}
-                      className="w-full bg-primary-500 hover:bg-primary-600 text-white py-2 px-4 rounded transition-colors flex items-center justify-center space-x-2"
+                      className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white py-2 px-4 rounded-lg transition-all flex items-center justify-center space-x-2 shadow-md hover:shadow-lg shadow-primary-500/10 hover:shadow-primary-500/20"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -210,7 +247,7 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
                     {!selectedDocument.blockchainTxHash && (
                       <button 
                         onClick={() => verifyOnBlockchain(selectedDocument.id)}
-                        className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded transition-colors flex items-center justify-center space-x-2"
+                        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 px-4 rounded-lg transition-all flex items-center justify-center space-x-2 shadow-md hover:shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -221,7 +258,7 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
                     
                     <button 
                       onClick={() => openRevokeModal(selectedDocument)}
-                      className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded transition-colors flex items-center justify-center space-x-2"
+                      className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 px-4 rounded-lg transition-all flex items-center justify-center space-x-2 shadow-md hover:shadow-lg shadow-red-500/10 hover:shadow-red-500/20"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -231,18 +268,28 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
                   </div>
                 </div>
                 
-                <div className="bg-dark-800 p-4 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-400 mb-2">QR Code</h4>
-                  <div className="flex justify-center bg-white p-4 rounded-lg">
+                <div className="bg-dark-800 p-4 rounded-lg shadow-lg border border-dark-600">
+                  <h4 className="text-sm font-medium text-gray-400 mb-2 flex items-center">
+                    <svg className="w-4 h-4 mr-2 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 6h1m-7 7v-1m-6-6H4" />
+                    </svg>
+                    QR Code
+                  </h4>
+                  <div className="flex justify-center bg-white p-4 rounded-lg shadow-inner transition-transform transform hover:scale-105">
                     <img 
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(selectedDocument.certificationId)}`} 
                       alt="Certificate QR Code" 
-                      className="w-36 h-36 object-contain"
+                      className="w-36 h-36 object-contain hover:animate-pulse"
                     />
                   </div>
-                  <p className="text-xs text-center mt-2 text-gray-400">Scan to verify certificate authenticity</p>
+                  <p className="text-xs text-center mt-2 text-gray-400 flex items-center justify-center">
+                    <svg className="w-3 h-3 mr-1 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Scan to verify certificate authenticity
+                  </p>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </motion.div>
         </div>
@@ -257,18 +304,18 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3 }}
-            className="relative bg-dark-700 rounded-xl p-6 shadow-2xl max-w-md w-full mx-4 z-50"
+            className="relative bg-gradient-to-b from-dark-700 to-dark-800 rounded-xl p-6 shadow-2xl max-w-md w-full mx-4 z-50 border border-dark-500"
           >
             <div className="text-center mb-5">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-500/20 mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-red-500/30 to-red-600/20 mb-4 shadow-lg shadow-red-500/10">
                 <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
               
-              <h3 className="text-xl font-bold mb-2">Revoke Certificate</h3>
+              <h3 className="text-xl font-bold mb-2 bg-gradient-to-r from-red-400 to-red-500 bg-clip-text text-transparent">Revoke Certificate</h3>
               <p className="text-gray-300 mb-4">
-                Are you sure you want to revoke the certificate for {selectedDocument.documentType} issued to {selectedDocument.ownerName}?
+                Are you sure you want to revoke the certificate for <span className="font-semibold text-white">{selectedDocument.documentType}</span> issued to <span className="font-semibold text-white">{selectedDocument.ownerName}</span>?
               </p>
               
               <div className="mb-4">
@@ -276,7 +323,7 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
                 <textarea
                   value={revokeReason}
                   onChange={(e) => setRevokeReason(e.target.value)}
-                  className="w-full bg-dark-800 border border-dark-600 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-primary-500 resize-none h-24"
+                  className="w-full bg-dark-900 border border-dark-600 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 resize-none h-24 transition-all"
                   placeholder="Please provide a reason for revoking this certificate"
                 ></textarea>
               </div>
@@ -284,14 +331,14 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
               <div className="flex space-x-3">
                 <button
                   onClick={closeRevokeModal}
-                  className="flex-1 py-2 px-4 bg-dark-600 hover:bg-dark-500 rounded-lg text-white transition-colors"
+                  className="flex-1 py-2 px-4 bg-dark-600 hover:bg-dark-500 rounded-lg text-white transition-all shadow-md hover:shadow-lg"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleRevokeConfirm}
                   disabled={!revokeReason.trim()}
-                  className="flex-1 py-2 px-4 bg-red-500 hover:bg-red-600 disabled:bg-red-800 disabled:cursor-not-allowed rounded-lg text-white transition-colors"
+                  className="flex-1 py-2 px-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 disabled:from-red-800 disabled:to-red-900 disabled:cursor-not-allowed rounded-lg text-white transition-all shadow-md hover:shadow-lg shadow-red-500/10 hover:shadow-red-500/20"
                 >
                   Revoke
                 </button>
@@ -304,12 +351,12 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
       <div className="bg-dark-700 rounded-xl p-6 shadow-xl">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold">Verified Documents</h2>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-primary-400 to-blue-400 bg-clip-text text-transparent">Verified Documents</h2>
             {refreshDocuments && (
               <button
                 onClick={refreshDocuments}
                 disabled={loadingDocuments}
-                className="bg-primary-500 hover:bg-primary-600 disabled:bg-primary-800 disabled:cursor-not-allowed text-white p-2 rounded-lg transition-colors"
+                className="bg-gradient-to-r from-primary-500 to-blue-500 hover:from-primary-600 hover:to-blue-600 disabled:from-primary-800 disabled:to-blue-800 disabled:cursor-not-allowed text-white p-2 rounded-lg transition-all shadow-md hover:shadow-lg"
                 title="Refresh Documents"
               >
                 <svg 
@@ -343,17 +390,34 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
                 placeholder="Search documents..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-dark-800 border border-dark-600 rounded-lg py-2 px-4 pl-10 text-sm focus:outline-none focus:border-primary-500"
+                className="w-full bg-dark-800 border border-dark-600 rounded-lg py-2 px-4 pl-10 text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all shadow-sm"
               />
               <svg className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
+              {searchTerm && (
+                <button 
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-2.5 text-gray-400 hover:text-white transition-colors"
+                  aria-label="Clear search"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
             </div>
             
             <select
               value={documentTypeFilter}
               onChange={(e) => setDocumentTypeFilter(e.target.value)}
-              className="bg-dark-800 border border-dark-600 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-primary-500"
+              className="bg-dark-800 border border-dark-600 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all shadow-sm appearance-none"
+              style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, 
+                backgroundPosition: 'right 0.5rem center', 
+                backgroundRepeat: 'no-repeat', 
+                backgroundSize: '1.5em 1.5em',
+                paddingRight: '2.5rem' 
+              }}
             >
               <option value="all">All Document Types</option>
               {documentTypes.map(type => (
@@ -364,7 +428,13 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
-              className="bg-dark-800 border border-dark-600 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-primary-500"
+              className="bg-dark-800 border border-dark-600 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all shadow-sm appearance-none"
+              style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, 
+                backgroundPosition: 'right 0.5rem center', 
+                backgroundRepeat: 'no-repeat', 
+                backgroundSize: '1.5em 1.5em',
+                paddingRight: '2.5rem' 
+              }}
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -374,15 +444,25 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
         
         {loadingDocuments ? (
           <div className="flex items-center justify-center h-60">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+            <div className="relative">
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-500/30 border-t-4 border-t-primary-500"></div>
+              <div className="absolute top-0 left-0 animate-ping h-16 w-16 rounded-full bg-primary-500/10 delay-150"></div>
+            </div>
           </div>
         ) : filteredDocuments.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-60 text-gray-400">
-            <svg className="w-16 h-16 mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <p className="text-lg font-medium">No verified documents found</p>
-            <p className="text-sm max-w-md text-center mt-2">
+            <div className="relative">
+              <svg className="w-20 h-20 text-gray-600 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <div className="absolute bottom-0 right-0 h-6 w-6 rounded-full bg-dark-600 flex items-center justify-center border-2 border-dark-800">
+                <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-lg font-bold mt-4 bg-gradient-to-r from-gray-400 to-gray-500 bg-clip-text text-transparent">No verified documents found</p>
+            <p className="text-sm max-w-md text-center mt-2 text-gray-500">
               {documentTypeFilter !== 'all' 
                 ? `No ${documentTypeFilter} documents have been verified.`
                 : searchTerm 
@@ -392,130 +472,149 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-dark-600">
-                <thead>
+            <div className="overflow-x-auto rounded-xl border border-dark-600 shadow-xl bg-gradient-to-b from-dark-800/50 to-dark-900/50">
+              <table className="min-w-full divide-y divide-dark-600/70 rounded-xl overflow-hidden table-fixed">
+                <thead className="bg-gradient-to-r from-dark-800 to-dark-700">
                   <tr>
-                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    <th scope="col" className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-[80px]">
                       Preview
                     </th>
-                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    <th scope="col" className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Document Type
                     </th>
-                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    <th scope="col" className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Owner
                     </th>
-                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    <th scope="col" className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Certification ID
                     </th>
-                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    <th scope="col" className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Verified Date
                     </th>
-                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    <th scope="col" className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Blockchain Status
                     </th>
-                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    <th scope="col" className="px-3 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider w-[120px]">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-dark-600 bg-dark-800/30">
-                  {currentDocuments.map((document) => (
-                    <tr key={document.id} className="hover:bg-dark-600/50 transition-colors">
-                      <td className="px-4 py-3 whitespace-nowrap">
+                <tbody className="divide-y divide-dark-600/40 bg-dark-800/10">
+                  {currentDocuments.map((document, index) => (
+                    <tr 
+                      key={document.id} 
+                      className={`hover:bg-dark-600/40 transition-colors duration-300 cursor-pointer border-l-0 hover:border-l-[3px] hover:border-primary-500 group ${index % 2 === 0 ? 'bg-dark-800/20' : 'bg-transparent'}`}
+                      onClick={() => openDocumentModal(document)}
+                    >
+                      <td className="px-3 py-4 whitespace-nowrap">
                         <div 
-                          className="w-12 h-12 rounded overflow-hidden bg-dark-600 cursor-pointer hover:ring-2 hover:ring-primary-500 transition-all" 
-                          onClick={() => openDocumentModal(document)}
+                          className="w-10 h-10 rounded overflow-hidden bg-dark-600 cursor-pointer transition-all group-hover:ring-2 group-hover:ring-primary-500 group-hover:shadow-lg group-hover:shadow-primary-500/20" 
                           title="Click to view details"
                         >
                           <img 
                             src={document.documentUrl} 
                             alt={document.documentType}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover transition-transform group-hover:scale-110"
                           />
                         </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                        {document.documentType}
+                      <td className="px-3 py-4 whitespace-nowrap text-sm font-medium truncate max-w-[150px]">
+                        <div className="flex items-center">
+                          <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-500 shadow-md shadow-blue-500/20 group-hover:shadow-blue-500/40 group-hover:scale-125 transition-all mr-2 flex-shrink-0"></div>
+                          <span className="group-hover:text-white transition-colors truncate">{document.documentType}</span>
+                        </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
-                        {document.ownerName}
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-300 truncate max-w-[150px]">
+                        <div className="flex items-center">
+                          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary-500 to-blue-600 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all transform group-hover:scale-110 mr-2 flex-shrink-0">
+                            <span className="text-xs font-bold text-white">
+                              {document.ownerName.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <span className="group-hover:text-white transition-colors truncate">{document.ownerName}</span>
+                        </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
-                        <span className="font-mono">{document.certificationId}</span>
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-primary-300 group-hover:text-primary-200 transition-colors truncate max-w-[120px]">
+                        <span className="font-mono truncate">{document.certificationId}</span>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
-                        {formatDate(document.verifiedDate)}
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-300 truncate max-w-[150px]">
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 mr-2 text-gray-400 group-hover:text-primary-400 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span className="group-hover:text-white transition-colors truncate">{formatDate(document.verifiedDate)}</span>
+                        </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td className="px-3 py-4 whitespace-nowrap">
                         {document.blockchainTxHash ? (
                           <div className="flex items-center">
-                            <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-500/20 text-green-400 mr-2">
+                            <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-green-500/20 to-emerald-500/10 text-green-400 border border-green-500/30 inline-flex items-center shadow-sm shadow-green-500/10 group-hover:shadow-green-500/20 transition-all">
+                              <span className="h-1.5 w-1.5 rounded-full bg-green-400 mr-1"></span>
                               Verified
                             </span>
                             <a 
                               href={`https://etherscan.io/tx/${document.blockchainTxHash}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-primary-400 hover:text-primary-300 transition-colors group relative"
+                              className="text-primary-400 hover:text-primary-300 transition-colors group relative ml-1"
                               title="View on Etherscan"
+                              onClick={(e) => e.stopPropagation()}
                             >
                               <span className="font-mono">{truncateHash(document.blockchainTxHash)}</span>
-                              <span className="hidden group-hover:block absolute bottom-full left-0 bg-dark-900 text-xs px-2 py-1 rounded mb-1 whitespace-normal w-60 break-all">
+                              <span className="hidden group-hover:block absolute bottom-full left-0 bg-dark-900 text-xs px-2 py-1 rounded mb-1 whitespace-normal w-60 break-all z-10">
                                 {document.blockchainTxHash}
                               </span>
-                              <svg className="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <svg className="w-3 h-3 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                               </svg>
                             </a>
                           </div>
                         ) : (
-                          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-500/20 text-gray-400">
-                            Not on Blockchain
+                          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-gray-500/20 to-gray-600/10 text-gray-400 border border-gray-500/30 inline-flex items-center shadow-sm shadow-gray-500/10 group-hover:shadow-gray-500/20 transition-all">
+                            <span className="h-1.5 w-1.5 rounded-full bg-gray-400 mr-1"></span>
+                            Not on BC
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
-                        <div className="flex space-x-3">
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-300" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex space-x-1">
                           <button 
-                            onClick={() => openDocumentModal(document)}
-                            className="text-primary-400 hover:text-primary-300 transition-colors"
-                            title="View Details"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                          </button>
-                          
-                          <button 
-                            onClick={() => viewDocumentCertificate(document.id)}
-                            className="text-blue-400 hover:text-blue-300 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              viewDocumentCertificate(document.id);
+                            }}
+                            className="text-blue-400 hover:text-blue-300 transition-all p-1.5 rounded-full hover:bg-blue-500/20 hover:shadow-md hover:shadow-blue-500/10 transform hover:scale-110"
                             title="View Certificate"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                           </button>
                           
                           {!document.blockchainTxHash && (
                             <button 
-                              onClick={() => verifyOnBlockchain(document.id)}
-                              className="text-green-400 hover:text-green-300 transition-colors"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                verifyOnBlockchain(document.id);
+                              }}
+                              className="text-green-400 hover:text-green-300 transition-all p-1.5 rounded-full hover:bg-green-500/20 hover:shadow-md hover:shadow-green-500/10 transform hover:scale-110"
                               title="Verify on Blockchain"
                             >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                               </svg>
                             </button>
                           )}
                           
                           <button 
-                            onClick={() => openRevokeModal(document)}
-                            className="text-red-400 hover:text-red-300 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openRevokeModal(document);
+                            }}
+                            className="text-red-400 hover:text-red-300 transition-all p-1.5 rounded-full hover:bg-red-500/20 hover:shadow-md hover:shadow-red-500/10 transform hover:scale-110"
                             title="Revoke Certificate"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                           </button>
@@ -527,7 +626,7 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
               </table>
             </div>
             
-            {/* Pagination */}
+            {/* Pagination - Enhanced styling */}
             {totalPages > 1 && (
               <div className="mt-6 flex justify-between items-center">
                 <div className="text-sm text-gray-400">
@@ -537,7 +636,7 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
                   <button
                     onClick={() => paginate(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-1 rounded-md bg-dark-800 text-gray-300 hover:bg-dark-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-3 py-1 rounded-md bg-dark-800 text-gray-300 hover:bg-dark-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm hover:shadow flex items-center justify-center"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -565,10 +664,10 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
                       <button
                         key={pageNum}
                         onClick={() => paginate(pageNum)}
-                        className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                        className={`px-3 py-1 rounded-md text-sm transition-all duration-200 shadow-sm ${
                           currentPage === pageNum
-                            ? 'bg-primary-500 text-white'
-                            : 'bg-dark-800 text-gray-300 hover:bg-dark-600'
+                            ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md shadow-primary-500/20"
+                            : "bg-dark-800 text-gray-300 hover:bg-dark-600 hover:text-white hover:shadow"
                         }`}
                       >
                         {pageNum}
@@ -579,7 +678,7 @@ const VerifiedDocumentsSection: React.FC<VerifiedDocumentsSectionProps> = ({
                   <button
                     onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-1 rounded-md bg-dark-800 text-gray-300 hover:bg-dark-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-3 py-1 rounded-md bg-dark-800 text-gray-300 hover:bg-dark-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm hover:shadow flex items-center justify-center"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
