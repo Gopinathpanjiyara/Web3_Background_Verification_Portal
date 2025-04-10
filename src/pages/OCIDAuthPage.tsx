@@ -1,29 +1,87 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useOCAuth, LoginButton } from '@opencampus/ocid-connect-js';
+import { LoginButton } from '@opencampus/ocid-connect-js';
 
 const OCIDAuthPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { authState, OCId } = useOCAuth();
-
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [pageLoaded, setPageLoaded] = useState(false);
+  
+  // Parse URL for error messages
   useEffect(() => {
-    // Check if we're returning from authentication
-    const isReturningFromAuth = location.search.includes('code=');
-    
-    if (isReturningFromAuth && authState?.isAuthenticated) {
-      localStorage.setItem('ocid', OCId);
-      console.log('OCID Authentication Successful:', {
-        OCId,
-        authState,
-        timestamp: new Date().toISOString()
-      });
-      // No need to navigate since we're already on the redirect page
-    } else if (authState?.isAuthenticated) {
-      // If already authenticated, navigate to individual registration
-      navigate('/register/individual', { state: { step: 'registration' } });
+    const params = new URLSearchParams(location.search);
+    const errorMessage = params.get('error');
+    if (errorMessage) {
+      setConnectionError(decodeURIComponent(errorMessage));
     }
-  }, [authState, OCId, navigate, location]);
+  }, [location]);
+
+  // Handle WebSocket and other errors
+  useEffect(() => {
+    // Mark page as loaded after a delay
+    const loadTimer = setTimeout(() => {
+      setPageLoaded(true);
+    }, 1000);
+    
+    // Global error handler to catch WebSocket errors
+    const handleError = (event: ErrorEvent) => {
+      console.error('Error detected:', event);
+      if (typeof event.message === 'string' && 
+         (event.message.includes('WebSocket') || 
+          event.message.toLowerCase().includes('unauthorized') || 
+          event.message.toLowerCase().includes('origin not allowed'))) {
+        setConnectionError('Connection error with authentication service: Unauthorized origin. Please check your network settings and try again.');
+      }
+      
+      // Also catch getAttribute errors that might be from filter_content.js
+      if (typeof event.message === 'string' && 
+          event.message.includes('getAttribute') && 
+          event.message.includes('undefined')) {
+        console.warn('Caught getAttribute error, likely from filter_content.js - this is expected and can be ignored');
+        // We don't set a UI error for this as it's likely a non-critical error
+      }
+    };
+
+    // Listen for unhandled errors
+    window.addEventListener('error', handleError);
+    
+    return () => {
+      window.removeEventListener('error', handleError);
+      clearTimeout(loadTimer);
+    };
+  }, []);
+
+  // DOM safety wrapper - add this before the component renders to ensure DOM elements are available
+  useEffect(() => {
+    // Create a fake element with the required attribute to prevent filter_content.js errors
+    const preventFilterContentError = () => {
+      try {
+        // This creates a "safety" element that filter_content.js might be looking for
+        const safetyElement = document.createElement('div');
+        safetyElement.id = 'filter-content-safety';
+        safetyElement.setAttribute('data-filter-content', 'true');
+        document.body.appendChild(safetyElement);
+        
+        return () => {
+          if (safetyElement.parentNode) {
+            safetyElement.parentNode.removeChild(safetyElement);
+          }
+        };
+      } catch (e) {
+        console.warn('Failed to create safety element', e);
+        return () => {};
+      }
+    };
+    
+    return preventFilterContentError();
+  }, []);
+
+  // Provide helpful guidance if there's a connection error
+  const handleRetry = () => {
+    setConnectionError(null);
+    window.location.href = '/ocid-auth';
+  };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -54,9 +112,32 @@ const OCIDAuthPage: React.FC = () => {
             <h2 className="text-3xl font-bold text-primary-500 mb-4">Connect with Open Campus</h2>
             <p className="text-gray-300">Please authenticate with Open Campus to continue registration</p>
           </div>
+          
+          {connectionError && (
+            <div className="bg-red-900/30 border border-red-800 text-red-400 p-4 rounded-lg mb-6 text-center">
+              <div className="text-red-300 text-xl mb-2">⚠️ Connection Error</div>
+              <p>{connectionError}</p>
+              <div className="mt-3">
+                <button 
+                  onClick={handleRetry} 
+                  className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+                >
+                  Retry Connection
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* After page is loaded and no connection error, show WebSocket troubleshooting tips */}
+          {pageLoaded && !connectionError && (
+            <div className="bg-dark-700 p-4 rounded-lg mb-6 text-center text-gray-400 text-sm">
+              <p>If login button doesn't appear or errors occur, ensure your browser allows WebSocket connections.</p>
+              <p className="mt-1">Some browsers or corporate networks may block these connections.</p>
+            </div>
+          )}
 
           {/* Use the official OCID LoginButton component */}
-          <div className="w-full flex justify-center">
+          <div id="ocid-login-button-container" className="w-full flex justify-center">
             <LoginButton 
               pill={false}
               disabled={false}
@@ -64,6 +145,11 @@ const OCIDAuthPage: React.FC = () => {
                 button: "w-full max-w-md py-3 mb-4 rounded-lg bg-dark-700 text-white font-semibold hover:bg-dark-600 transition-colors flex items-center justify-center relative"
               }}
             />
+          </div>
+          
+          {/* Development mode notice */}
+          <div className="mt-4 text-center text-xs text-gray-500">
+            <p>Development mode enabled: OCID authentication in sandbox mode</p>
           </div>
         </div>
       </div>

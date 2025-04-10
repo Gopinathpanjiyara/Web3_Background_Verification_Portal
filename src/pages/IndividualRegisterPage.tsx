@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { useOCAuth } from '@opencampus/ocid-connect-js';
+import Cookies from 'js-cookie';
 
 // API URL
 const API_URL = 'http://localhost:5002/api';
@@ -32,6 +33,7 @@ const IndividualRegisterPage: React.FC = () => {
   const [gender, setGender] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [ocidValue, setOcidValue] = useState('');
   
   // UI state
   const [isLoading, setIsLoading] = useState(false);
@@ -43,24 +45,22 @@ const IndividualRegisterPage: React.FC = () => {
   // Dropdown ref for outside click handling
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Handle OCID authentication redirect
+  // Handle OCID authentication
   useEffect(() => {
-    // Check if we're returning from authentication
-    const isReturningFromAuth = location.search.includes('code=');
-    
-    if (isReturningFromAuth && authState?.isAuthenticated) {
-      // Store OCID in localStorage if not already there
-      if (!localStorage.getItem('ocid')) {
-        localStorage.setItem('ocid', OCId);
-      }
-      
-      console.log('OCID Authentication Successful in IndividualRegisterPage:', {
+    if (authState?.isAuthenticated && OCId) {
+      console.log('OCID Authentication detected in IndividualRegisterPage:', {
         OCId,
         authState,
         timestamp: new Date().toISOString()
       });
+      
+      // Set the OCID value for the form
+      setOcidValue(OCId);
+      
+      // Store in cookie
+      Cookies.set('ocid', OCId, { expires: 7 });
     }
-  }, [authState, OCId, location]);
+  }, [authState, OCId]);
 
   // Check if phone or email already exists
   const checkDuplicateEntry = async (field: string, value: string): Promise<boolean> => {
@@ -148,7 +148,10 @@ const IndividualRegisterPage: React.FC = () => {
       // Create full name from first and last name
       const fullName = `${firstName} ${lastName}`;
       
-      // Register user in database
+      // Get OCID - first try from state, then from cookie
+      const ocid = ocidValue || Cookies.get('ocid') || OCId || '';
+      
+      // Register user in database with OCID
       const response = await axios.post<RegisterResponse>(`${API_URL}/register`, {
         firstName,
         lastName,
@@ -158,6 +161,7 @@ const IndividualRegisterPage: React.FC = () => {
         dob,
         gender,
         password,
+        ocid,
       });
       
       setSuccess('Registration successful! You can now log in.');
@@ -323,12 +327,16 @@ const IndividualRegisterPage: React.FC = () => {
                 <input
                   type="text"
                   id="ocid"
-                  value={localStorage.getItem('ocid') || ''}
+                  value={ocidValue || Cookies.get('ocid') || ''}
                   className="w-full px-4 py-3 rounded-lg bg-dark-700 border border-dark-600 text-gray-400 cursor-not-allowed"
                   readOnly
                   disabled
                 />
-                <p className="text-xs text-gray-500 mt-1">Your Open Campus ID (automatically filled)</p>
+                {ocidValue ? (
+                  <p className="text-xs text-gray-500 mt-1">Your Open Campus ID (authenticated successfully)</p>
+                ) : (
+                  <p className="text-xs text-gray-500 mt-1">No Open Campus ID detected</p>
+                )}
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
