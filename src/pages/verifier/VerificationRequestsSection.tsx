@@ -123,6 +123,12 @@ const VerificationRequestsSection: React.FC<VerificationRequestsSectionProps> = 
     setShowFullScreenDetail(true);
   };
 
+  // Add a new function to open all requests for a requester
+  const openRequesterDetailView = (group: VerificationRequestGroup) => {
+    setSelectedRequest(group.requests[0]); // Set the first request as selected
+    setShowFullScreenDetail(true);
+  };
+
   const closeDetailsModal = () => {
     setShowDetailsModal(false);
     setTimeout(() => setSelectedRequest(null), 300);
@@ -331,7 +337,11 @@ const VerificationRequestsSection: React.FC<VerificationRequestsSectionProps> = 
                 <div key={group.requesterName} className="mb-4 border-b border-dark-600/40 last:border-b-0 hover:bg-dark-700/30 transition-colors">
                   <div 
                     className="flex flex-col md:flex-row md:items-center p-4 cursor-pointer bg-gradient-to-r from-dark-700/80 to-dark-800/80 hover:from-dark-650 hover:to-dark-750 transition-all rounded-t-lg"
-                    onClick={() => toggleGroup(group.requesterName)}
+                    onClick={() => {
+                      if (group.requests.length > 0) {
+                        openRequesterDetailView(group);
+                      }
+                    }}
                   >
                     <div className="flex items-center flex-grow">
                       <div className="mr-4 flex-shrink-0">
@@ -475,55 +485,31 @@ const VerificationRequestsSection: React.FC<VerificationRequestsSectionProps> = 
                                         disabled={processingRequestId === request.id}
                             >
                                         <svg className={`w-5 h-5 ${processingRequestId === request.id ? 'animate-pulse' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
-                            
-                            <button 
-                                        onClick={() => handleApproveRequest(request.id)}
-                                        className="text-green-400 hover:text-green-300 transition-all p-2 rounded-full hover:bg-green-500/20 hover:shadow-md hover:shadow-green-500/10 transform hover:scale-110"
-                              title="Approve"
-                                        aria-label="Approve request"
-                                        disabled={processingRequestId === request.id}
-                            >
-                                        <svg className={`w-5 h-5 ${processingRequestId === request.id ? 'animate-pulse' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </button>
-                            
-                            <button 
-                                        onClick={() => handleRejectRequest(request.id)}
-                                        className="text-red-400 hover:text-red-300 transition-all p-2 rounded-full hover:bg-red-500/20 hover:shadow-md hover:shadow-red-500/10 transform hover:scale-110"
-                              title="Reject"
-                                        aria-label="Reject request"
-                                        disabled={processingRequestId === request.id}
-                            >
-                                        <svg className={`w-5 h-5 ${processingRequestId === request.id ? 'animate-pulse' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232L18 7M5 19h4m10-11a8 8 0 11-16 0 8 8 0 0116 0z" />
+                                        </svg>
                             </button>
                           </>
                         )}
                       </div>
                     </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
-              ))}
-              </div>
-              </div>
-        )}
-              </div>
-              
+
       {/* Full Screen Detail View */}
       <AnimatePresence>
         {showFullScreenDetail && selectedRequest && (
           <VerificationRequestDetailView
-            request={selectedRequest}
+            requests={groupedRequests.find(g => g.requesterName === selectedRequest.requesterName)?.requests || [selectedRequest]}
             onClose={closeFullScreenDetail}
             onApprove={handleApproveRequest}
             onReject={handleRejectRequest}
@@ -536,4 +522,4 @@ const VerificationRequestsSection: React.FC<VerificationRequestsSectionProps> = 
   );
 };
 
-export default VerificationRequestsSection; 
+export default VerificationRequestsSection;
