@@ -195,16 +195,16 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({ amount, onSuccess, onCa
       <h2 className="text-3xl font-bold mb-4 text-white bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500">Complete Payment</h2>
       <div className="flex justify-between items-center mb-6">
         <p className="text-slate-300">Amount: <span className="text-xl font-bold text-white">₹{amount.toFixed(2)}</span></p>
-        <div className="flex space-x-2">
-          <img src="https://cdn.iconscout.com/icon/free/png-256/free-visa-3-226460.png" alt="Visa" className="h-6" />
-          <img src="https://cdn.iconscout.com/icon/free/png-256/free-mastercard-3-226462.png" alt="MasterCard" className="h-6" />
-          <img src="https://cdn.iconscout.com/icon/free/png-256/free-upi-2085056-1747946.png" alt="UPI" className="h-6" />
+        <div className="flex space-x-3">
+          <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm">V</div>
+          <div className="h-8 w-8 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-sm">M</div>
+          <div className="h-8 w-8 rounded-full bg-green-600 flex items-center justify-center text-white font-bold text-sm">U</div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Left Side - Payment Methods */}
-        <div className="md:col-span-1 bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 shadow-lg">
+        <div className="md:col-span-1 bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 shadow-lg md:self-start sticky top-4 h-max">
           <h3 className="text-lg font-semibold text-slate-300 mb-4 pb-2 border-b border-slate-700">Payment Options</h3>
           
           <div className="flex flex-col space-y-2">
@@ -280,20 +280,20 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({ amount, onSuccess, onCa
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
                     <div className="bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-3 flex flex-col items-center cursor-pointer hover:border-indigo-500/50 transition-colors group">
-                      <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 group-hover:bg-indigo-500/20">
-                        <img src="https://cdn.iconscout.com/icon/free/png-256/free-visa-3-226460.png" alt="Visa" className="h-6" />
+                      <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center mb-3 group-hover:bg-blue-700 transition-colors">
+                        <span className="text-2xl font-bold text-white">V</span>
                       </div>
                       <span className="text-sm text-slate-300 group-hover:text-indigo-300">Visa</span>
                     </div>
                     <div className="bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-3 flex flex-col items-center cursor-pointer hover:border-indigo-500/50 transition-colors group">
-                      <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 group-hover:bg-indigo-500/20">
-                        <img src="https://cdn.iconscout.com/icon/free/png-256/free-mastercard-3-226462.png" alt="MasterCard" className="h-6" />
+                      <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center mb-3 group-hover:bg-red-700 transition-colors">
+                        <span className="text-2xl font-bold text-white">M</span>
                       </div>
                       <span className="text-sm text-slate-300 group-hover:text-indigo-300">MasterCard</span>
                     </div>
                     <div className="bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-3 flex flex-col items-center cursor-pointer hover:border-indigo-500/50 transition-colors group">
-                      <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 group-hover:bg-indigo-500/20">
-                        <img src="https://cdn.iconscout.com/icon/free/png-256/free-american-express-3-226461.png" alt="American Express" className="h-6" />
+                      <div className="w-16 h-16 rounded-full bg-yellow-600 flex items-center justify-center mb-3 group-hover:bg-yellow-700 transition-colors">
+                        <span className="text-2xl font-bold text-white">A</span>
                       </div>
                       <span className="text-sm text-slate-300 group-hover:text-indigo-300">American Express</span>
                     </div>
@@ -422,26 +422,26 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({ amount, onSuccess, onCa
                   <p className="text-slate-300 font-medium">Select UPI App</p>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-3 flex flex-col items-center cursor-pointer hover:border-indigo-500/50 transition-colors group">
-                      <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 group-hover:bg-indigo-500/20">
-                        <img src="https://cdn.iconscout.com/icon/free/png-256/free-google-pay-2038779-1721670.png" alt="Google Pay" className="h-6" />
+                      <div className="w-16 h-16 rounded-full bg-teal-600 flex items-center justify-center mb-3 group-hover:bg-teal-700 transition-colors">
+                        <span className="text-3xl font-bold text-white">G</span>
                       </div>
                       <span className="text-sm text-slate-300 group-hover:text-indigo-300">Google Pay</span>
                     </div>
                     <div className="bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-3 flex flex-col items-center cursor-pointer hover:border-indigo-500/50 transition-colors group">
-                      <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 group-hover:bg-indigo-500/20">
-                        <img src="https://cdn.iconscout.com/icon/free/png-256/free-phonepe-1649744-1399663.png" alt="PhonePe" className="h-6" />
+                      <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center mb-3 group-hover:bg-purple-700 transition-colors">
+                        <span className="text-3xl font-bold text-white">P</span>
                       </div>
                       <span className="text-sm text-slate-300 group-hover:text-indigo-300">PhonePe</span>
                     </div>
                     <div className="bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-3 flex flex-col items-center cursor-pointer hover:border-indigo-500/50 transition-colors group">
-                      <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 group-hover:bg-indigo-500/20">
-                        <img src="https://cdn.iconscout.com/icon/free/png-256/free-paytm-226448.png" alt="Paytm" className="h-6" />
+                      <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center mb-3 group-hover:bg-blue-700 transition-colors">
+                        <span className="text-3xl font-bold text-white">P</span>
                       </div>
                       <span className="text-sm text-slate-300 group-hover:text-indigo-300">Paytm</span>
                     </div>
                     <div className="bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-3 flex flex-col items-center cursor-pointer hover:border-indigo-500/50 transition-colors group">
-                      <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 group-hover:bg-indigo-500/20">
-                        <img src="https://cdn.iconscout.com/icon/free/png-256/free-bhim-3-858293.png" alt="BHIM" className="h-6" />
+                      <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center mb-3 group-hover:bg-green-700 transition-colors">
+                        <span className="text-3xl font-bold text-white">B</span>
                       </div>
                       <span className="text-sm text-slate-300 group-hover:text-indigo-300">BHIM</span>
                     </div>
@@ -500,10 +500,10 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({ amount, onSuccess, onCa
                         selectedBank === 'sbi' ? 'border-indigo-500 bg-indigo-500/10' : ''
                       }`}
                     >
-                      <div className={`w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 ${
-                        selectedBank === 'sbi' ? 'bg-indigo-500/20' : ''
-                      }`}>
-                        <img src="https://cdn.iconscout.com/icon/free/png-256/free-sbi-282446.png" alt="State Bank of India" className="h-6" />
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${
+                        selectedBank === 'sbi' ? 'bg-blue-700' : 'bg-blue-600'
+                      } transition-colors`}>
+                        <span className="text-3xl font-bold text-white">S</span>
                       </div>
                       <span className="text-sm text-slate-300 group-hover:text-indigo-300">State Bank</span>
                     </div>
@@ -513,10 +513,10 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({ amount, onSuccess, onCa
                         selectedBank === 'hdfc' ? 'border-indigo-500 bg-indigo-500/10' : ''
                       }`}
                     >
-                      <div className={`w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 ${
-                        selectedBank === 'hdfc' ? 'bg-indigo-500/20' : ''
-                      }`}>
-                        <img src="https://cdn.iconscout.com/icon/free/png-256/free-hdfc-bank-282739.png" alt="HDFC Bank" className="h-6" />
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${
+                        selectedBank === 'hdfc' ? 'bg-red-700' : 'bg-red-600'
+                      } transition-colors`}>
+                        <span className="text-3xl font-bold text-white">H</span>
                       </div>
                       <span className="text-sm text-slate-300 group-hover:text-indigo-300">HDFC Bank</span>
                     </div>
@@ -526,49 +526,49 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({ amount, onSuccess, onCa
                         selectedBank === 'icici' ? 'border-indigo-500 bg-indigo-500/10' : ''
                       }`}
                     >
-                      <div className={`w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 ${
-                        selectedBank === 'icici' ? 'bg-indigo-500/20' : ''
-                      }`}>
-                        <img src="https://cdn.iconscout.com/icon/free/png-256/free-icici-bank-282777.png" alt="ICICI Bank" className="h-6" />
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${
+                        selectedBank === 'icici' ? 'bg-orange-700' : 'bg-orange-600'
+                      } transition-colors`}>
+                        <span className="text-3xl font-bold text-white">I</span>
                       </div>
                       <span className="text-sm text-slate-300 group-hover:text-indigo-300">ICICI Bank</span>
                     </div>
                     <div 
                       onClick={() => setSelectedBank('axis')}
                       className={`bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-3 flex flex-col items-center cursor-pointer hover:border-indigo-500/50 transition-colors group ${
-                        selectedBank === 'axis' ? 'border-indigo-500 bg-indigo-500/10' : ''
+                        selectedBank === 'axis' ? 'border-indigo-500 bg-purple-700' : 'bg-purple-600'
                       }`}
                     >
-                      <div className={`w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 ${
-                        selectedBank === 'axis' ? 'bg-indigo-500/20' : ''
-                      }`}>
-                        <img src="https://cdn.iconscout.com/icon/free/png-256/free-axis-bank-283095.png" alt="Axis Bank" className="h-6" />
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${
+                        selectedBank === 'axis' ? 'bg-purple-700' : 'bg-purple-600'
+                      } transition-colors`}>
+                        <span className="text-3xl font-bold text-white">A</span>
                       </div>
                       <span className="text-sm text-slate-300 group-hover:text-indigo-300">Axis Bank</span>
                     </div>
                     <div 
                       onClick={() => setSelectedBank('kotak')}
                       className={`bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-3 flex flex-col items-center cursor-pointer hover:border-indigo-500/50 transition-colors group ${
-                        selectedBank === 'kotak' ? 'border-indigo-500 bg-indigo-500/10' : ''
+                        selectedBank === 'kotak' ? 'border-indigo-500 bg-pink-700' : 'bg-pink-600'
                       }`}
                     >
-                      <div className={`w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 ${
-                        selectedBank === 'kotak' ? 'bg-indigo-500/20' : ''
-                      }`}>
-                        <img src="https://cdn.iconscout.com/icon/free/png-256/free-kotak-bank-283102.png" alt="Kotak Bank" className="h-6" />
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${
+                        selectedBank === 'kotak' ? 'bg-pink-700' : 'bg-pink-600'
+                      } transition-colors`}>
+                        <span className="text-3xl font-bold text-white">K</span>
                       </div>
                       <span className="text-sm text-slate-300 group-hover:text-indigo-300">Kotak Bank</span>
                     </div>
                     <div 
                       onClick={() => setSelectedBank('pnb')}
                       className={`bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-3 flex flex-col items-center cursor-pointer hover:border-indigo-500/50 transition-colors group ${
-                        selectedBank === 'pnb' ? 'border-indigo-500 bg-indigo-500/10' : ''
+                        selectedBank === 'pnb' ? 'border-indigo-500 bg-indigo-700' : 'bg-indigo-600'
                       }`}
                     >
-                      <div className={`w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 ${
-                        selectedBank === 'pnb' ? 'bg-indigo-500/20' : ''
-                      }`}>
-                        <img src="https://cdn.iconscout.com/icon/free/png-256/free-pnb-282791.png" alt="Punjab National Bank" className="h-6" />
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${
+                        selectedBank === 'pnb' ? 'bg-indigo-700' : 'bg-indigo-600'
+                      } transition-colors`}>
+                        <span className="text-3xl font-bold text-white">P</span>
                       </div>
                       <span className="text-sm text-slate-300 group-hover:text-indigo-300">PNB</span>
                     </div>
@@ -604,23 +604,33 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({ amount, onSuccess, onCa
                             : 'border-slate-700 bg-gradient-to-b from-slate-800 to-slate-900 text-slate-300 hover:border-indigo-500/30'
                         }`}
                       >
-                        <div className={`w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center mb-2 ${
+                        <div className={`w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center mb-3 ${
                           selectedWallet === wallet.id ? 'bg-indigo-500/20' : 'bg-white/5'
                         }`}>
                           {wallet.id === 'paytm' && (
-                            <img src="https://cdn.iconscout.com/icon/free/png-256/free-paytm-226448.png" alt="Paytm" className="h-6" />
+                            <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center">
+                              <span className="text-2xl font-bold text-white">P</span>
+                            </div>
                           )}
                           {wallet.id === 'phonepe' && (
-                            <img src="https://cdn.iconscout.com/icon/free/png-256/free-phonepe-1649744-1399663.png" alt="PhonePe" className="h-6" />
+                            <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center">
+                              <span className="text-2xl font-bold text-white">P</span>
+                            </div>
                           )}
                           {wallet.id === 'gpay' && (
-                            <img src="https://cdn.iconscout.com/icon/free/png-256/free-google-pay-2038779-1721670.png" alt="Google Pay" className="h-6" />
+                            <div className="w-12 h-12 rounded-full bg-teal-600 flex items-center justify-center">
+                              <span className="text-2xl font-bold text-white">G</span>
+                            </div>
                           )}
                           {wallet.id === 'amazonpay' && (
-                            <img src="https://cdn.iconscout.com/icon/free/png-256/free-amazon-pay-1649771-1399690.png" alt="Amazon Pay" className="h-6" />
+                            <div className="w-12 h-12 rounded-full bg-amber-600 flex items-center justify-center">
+                              <span className="text-2xl font-bold text-white">A</span>
+                            </div>
                           )}
                           {wallet.id === 'mobikwik' && (
-                            <img src="https://cdn.iconscout.com/icon/free/png-256/free-mobikwik-283657.png" alt="MobiKwik" className="h-6" />
+                            <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center">
+                              <span className="text-2xl font-bold text-white">M</span>
+                            </div>
                           )}
                         </div>
                         <span className="text-sm font-medium">{wallet.name}</span>

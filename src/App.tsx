@@ -10,6 +10,10 @@ import PricingPage from '@pages/PricingPage';
 import VerifyDocument from '@pages/VerifyDocument';
 import VerifierLoginPage from '@pages/verifier/VerifierLoginPage';
 import VerifierDashboard from '@pages/verifier/VerifierDashboard';
+import EducationVerification from '@pages/dashboard/services/EducationVerification';
+import EmploymentVerification from '@pages/dashboard/services/EmploymentVerification';
+import IdentityVerification from '@pages/dashboard/services/IdentityVerification';
+import AddressVerification from '@pages/dashboard/services/AddressVerification';
 import ScrollToTop from '@components/layout/ScrollToTop';
 import './styles/index.css';
 
@@ -23,6 +27,10 @@ function App() {
         <Route path="/register/individual" element={<IndividualRegisterPage />} />
         <Route path="/register/organization" element={<OrganizationRegisterPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/services/education" element={<EducationVerification />} />
+        <Route path="/dashboard/services/employment" element={<EmploymentVerification />} />
+        <Route path="/dashboard/services/identity" element={<IdentityVerification />} />
+        <Route path="/dashboard/services/address" element={<AddressVerification />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/verify" element={<VerifyDocument />} />
         <Route path="/verifier-login" element={<VerifierLoginPage />} />

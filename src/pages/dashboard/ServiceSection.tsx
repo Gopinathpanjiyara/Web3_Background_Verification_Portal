@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import PaymentGateway from '../../components/PaymentGateway';
 
 // API URL
@@ -17,9 +18,11 @@ interface VerificationService {
 }
 
 // Application flow steps
-type AppStep = 'select_services' | 'payment' | 'upload_documents';
+type AppStep = 'select_services' | 'payment' | 'payment_success' | 'final_submission';
 
 const ServiceSection: React.FC = () => {
+  const navigate = useNavigate();
+  
   // Application flow state
   const [currentStep, setCurrentStep] = useState<AppStep>('select_services');
   const [paymentCompleted, setPaymentCompleted] = useState(false);
@@ -40,6 +43,30 @@ const ServiceSection: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  
+  // Completed forms tracking
+  const [completedForms, setCompletedForms] = useState<string[]>([]);
+
+  // Check localStorage for previously completed forms
+  useEffect(() => {
+    const checkCompletedForms = () => {
+      const forms: string[] = [];
+      
+      if (localStorage.getItem('educationVerificationData')) forms.push('education');
+      if (localStorage.getItem('employmentVerificationData')) forms.push('employment');
+      if (localStorage.getItem('addressVerificationData')) forms.push('address');
+      if (localStorage.getItem('identityVerificationData')) forms.push('identity');
+      
+      setCompletedForms(forms);
+    };
+    
+    checkCompletedForms();
+    
+    // Set up an interval to periodically check for newly completed forms
+    const intervalId = setInterval(checkCompletedForms, 2000);
+    
+    return () => clearInterval(intervalId);
+  }, []);
 
   // Fetch services
   useEffect(() => {
@@ -149,12 +176,44 @@ const ServiceSection: React.FC = () => {
   // Handle payment success
   const handlePaymentSuccess = () => {
     setPaymentCompleted(true);
-    setCurrentStep('upload_documents');
+    setCurrentStep('payment_success');
+    
+    // Store selected services in localStorage to access them in service pages
+    localStorage.setItem('selectedServices', JSON.stringify(selectedServices));
+    
+    // Wait for animation to complete before redirecting
+    setTimeout(() => {
+      // If there's only one service selected, redirect directly to that service
+      if (selectedServices.length === 1) {
+        const serviceId = selectedServices[0];
+        navigateToServicePage(serviceId);
+      }
+    }, 2000);
   };
   
   // Handle payment cancellation
   const handlePaymentCancel = () => {
     setCurrentStep('select_services');
+  };
+
+  // Navigate to appropriate service page based on service ID
+  const navigateToServicePage = (serviceId: string) => {
+    switch (serviceId) {
+      case 'education':
+        navigate('/dashboard/services/education');
+        break;
+      case 'employment':
+        navigate('/dashboard/services/employment');
+        break;
+      case 'identity':
+        navigate('/dashboard/services/identity');
+        break;
+      case 'address':
+        navigate('/dashboard/services/address');
+        break;
+      default:
+        console.error(`Unknown service ID: ${serviceId}`);
+    }
   };
 
   // Handle file selection
@@ -205,23 +264,18 @@ const ServiceSection: React.FC = () => {
     }
   };
 
+  // Check if all selected services have their forms completed
+  const allFormsCompleted = () => {
+    return selectedServices.every(serviceId => completedForms.includes(serviceId));
+  };
+  
+  // Proceed to final submission
+  const proceedToFinalSubmission = () => {
+    setCurrentStep('final_submission');
+  };
+
   // Handle form submission
   const handleSubmit = async () => {
-    // Validate document uploads
-    const missingDocs = selectedServices.filter(serviceId => {
-      const service = services.find(s => s.id === serviceId);
-      return service?.documentRequired && !documents[serviceId];
-    });
-    
-    if (missingDocs.length > 0) {
-      const missingServiceNames = missingDocs.map(id => 
-        services.find(s => s.id === id)?.name
-      ).join(', ');
-      
-      alert(`Please upload required documents for: ${missingServiceNames}`);
-      return;
-    }
-    
     // Validate consent
     if (!consentGiven) {
       alert('Please provide your consent to continue');
@@ -232,19 +286,42 @@ const ServiceSection: React.FC = () => {
     setSubmitError(null);
     
     try {
+      // Collect all verification data from localStorage
+      const collectedData = {
+        selectedServices,
+        educationData: localStorage.getItem('educationVerificationData') 
+          ? JSON.parse(localStorage.getItem('educationVerificationData')!) 
+          : null,
+        employmentData: localStorage.getItem('employmentVerificationData') 
+          ? JSON.parse(localStorage.getItem('employmentVerificationData')!) 
+          : null,
+        addressData: localStorage.getItem('addressVerificationData') 
+          ? JSON.parse(localStorage.getItem('addressVerificationData')!) 
+          : null,
+        identityData: localStorage.getItem('identityVerificationData') 
+          ? JSON.parse(localStorage.getItem('identityVerificationData')!) 
+          : null,
+        paymentAmount: calculateTotal()
+      };
+      
+      console.log('Submitting verification data:', collectedData);
+      
       // Simulate API call for demo
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // In production, you would upload files and submit the form data here
+      // In production, you would upload all data here
       // const formData = new FormData();
-      // selectedServices.forEach(serviceId => {
-      //   if (documents[serviceId]) {
-      //     formData.append(`document_${serviceId}`, documents[serviceId]);
-      //   }
-      // });
-      // formData.append('services', JSON.stringify(selectedServices));
+      // formData.append('verificationData', JSON.stringify(collectedData));
       
       setSubmitSuccess(true);
+      
+      // Clear localStorage data after successful submission
+      localStorage.removeItem('educationVerificationData');
+      localStorage.removeItem('employmentVerificationData');
+      localStorage.removeItem('addressVerificationData');
+      localStorage.removeItem('identityVerificationData');
+      localStorage.removeItem('selectedServices');
+      
       // Reset form after successful submission
       setTimeout(() => {
         setSelectedServices([]);
@@ -252,6 +329,7 @@ const ServiceSection: React.FC = () => {
         setDocumentPreviews({});
         setConsentGiven(false);
         setSubmitSuccess(false);
+        setCompletedForms([]);
         setCurrentStep('select_services');
         setPaymentCompleted(false);
       }, 3000);
@@ -404,16 +482,16 @@ const ServiceSection: React.FC = () => {
         </motion.div>
       )}
       
-      {currentStep === 'upload_documents' && (
+      {currentStep === 'payment_success' && (
         <motion.div 
-          key="upload_documents"
+          key="payment_success"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.5 }}
           className="space-y-10"
         >
-          {/* Section 1: Payment Confirmation */}
+          {/* Payment Success */}
           <div className="bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-700/50">
             <div className="flex items-center mb-6">
               <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mr-4">
@@ -440,148 +518,188 @@ const ServiceSection: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <span className="text-slate-200">{service.name}</span>
+                      {completedForms.includes(serviceId) && (
+                        <span className="ml-2 px-2 py-0.5 text-xs bg-green-500/20 text-green-400 rounded-full">Completed</span>
+                      )}
                     </div>
                   );
                 })}
               </div>
             </div>
             
-            <p className="text-slate-300 mb-2">Please upload the required documents to complete your verification process.</p>
-          </div>
-          
-          {/* Section 2: Document Upload */}
-          <div className="bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-700/50">
-            <h2 className="text-3xl font-bold mb-6 text-white bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500">Upload Documents</h2>
-            <p className="text-slate-300 mb-8">Please upload relevant documents for each selected service</p>
+            <p className="text-slate-300 mb-6">Please complete the verification forms for each selected service.</p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {selectedServices.map(serviceId => {
-                const service = services.find(s => s.id === serviceId);
-                if (!service) return null;
-                
-                return (
-                  <div key={serviceId} className="bg-slate-800/70 backdrop-blur-sm rounded-xl p-6 border border-slate-700/70 shadow-lg">
-                    <h3 className="font-semibold text-lg text-white mb-4">{service.name}</h3>
-                    
-                    {documents[serviceId] ? (
-                      <div className="mb-3">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="text-slate-200 flex items-center">
+            {/* Navigate to Service Pages or Final Submission */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {selectedServices.map(serviceId => {
+                  const service = services.find(s => s.id === serviceId);
+                  if (!service) return null;
+                  
+                  const isCompleted = completedForms.includes(serviceId);
+                  
+                  return (
+                    <button
+                      key={serviceId}
+                      onClick={() => navigateToServicePage(serviceId)}
+                      className={`py-3 px-4 rounded-xl shadow-lg text-white font-medium transition-all duration-300 flex items-center ${
+                        isCompleted 
+                          ? 'bg-green-600 hover:bg-green-700' 
+                          : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700'
+                      }`}
+                    >
+                      {isCompleted && (
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                      <span className="flex-1">{service.name} Form</span>
+                      <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </button>
+                  );
+                })}
+              </div>
+              
+              {allFormsCompleted() && (
+                <button
+                  onClick={proceedToFinalSubmission}
+                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-green-500/30 text-white font-medium transition-all duration-300"
+                >
+                  Proceed to Final Submission
+                </button>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
+      
+      {currentStep === 'final_submission' && (
+        <motion.div 
+          key="final_submission"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.5 }}
+          className="space-y-10"
+        >
+          <div className="bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-700/50">
+            <h2 className="text-3xl font-bold mb-6 text-white bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500">Final Submission</h2>
+            
+            {/* Submit Success Message */}
+            {submitSuccess ? (
+              <div className="text-center py-10">
+                <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-10 h-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">Submission Successful!</h3>
+                <p className="text-slate-300 mb-6">
+                  Your verification request has been submitted successfully. You will receive updates on the status of your verification.
+                </p>
+                <p className="text-slate-400 mb-6">
+                  Reference ID: VER-{Math.random().toString(36).substring(2, 10).toUpperCase()}
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="bg-slate-800/70 backdrop-blur-sm rounded-xl p-6 border border-slate-700/70 shadow-lg mb-6">
+                  <h3 className="text-xl font-semibold text-indigo-300 mb-4">Verification Summary</h3>
+                  <div className="space-y-4">
+                    {selectedServices.map(serviceId => {
+                      const service = services.find(s => s.id === serviceId);
+                      if (!service) return null;
+                      
+                      return (
+                        <div key={serviceId} className="bg-slate-700/50 rounded-lg p-4">
+                          <h4 className="font-semibold text-white flex items-center">
                             <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
-                            <span className="truncate max-w-[200px]">{documents[serviceId]?.name}</span>
-                          </div>
-                          <button
-                            onClick={() => removeDocument(serviceId)}
-                            className="text-red-400 hover:text-red-300 transition-colors p-1"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
+                            {service.name}
+                          </h4>
+                          <p className="text-slate-300 text-sm mt-1">All required information provided</p>
                         </div>
-                        
-                        {/* Document preview */}
-                        {documentPreviews[serviceId] && (
-                          <div className="mt-3 border border-slate-700 rounded-xl overflow-hidden h-40 bg-slate-900/80 flex items-center justify-center shadow-inner">
-                            {documents[serviceId]?.type.startsWith('image/') ? (
-                              <img 
-                                src={documentPreviews[serviceId]} 
-                                alt="Document preview" 
-                                className="max-h-full object-contain"
-                              />
-                            ) : (
-                              <div className="text-center p-4">
-                                <svg className="w-12 h-12 mx-auto text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <p className="text-slate-400">Document uploaded</p>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="border-2 border-dashed border-slate-700 rounded-xl p-8 text-center hover:border-indigo-500/50 transition-colors group">
-                        <input
-                          type="file"
-                          id={`file-${serviceId}`}
-                          className="hidden"
-                          accept={service.documentTypes.join(',')}
-                          onChange={(e) => handleFileChange(serviceId, e)}
-                          ref={(el) => fileInputRefs.current[serviceId] = el}
-                        />
-                        <label
-                          htmlFor={`file-${serviceId}`}
-                          className="cursor-pointer flex flex-col items-center"
-                        >
-                          <div className="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center mb-3 group-hover:bg-indigo-500/20 transition-colors">
-                            <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                            </svg>
-                          </div>
-                          <span className="text-white font-medium text-lg group-hover:text-indigo-300 transition-colors">Upload document</span>
-                          <span className="text-slate-400 mt-2 group-hover:text-slate-300 transition-colors">
-                            Allowed: {service.documentTypes.join(', ')}
-                          </span>
-                        </label>
-                      </div>
-                    )}
+                      );
+                    })}
+                    
+                    <div className="bg-slate-700/50 rounded-lg p-4">
+                      <h4 className="font-semibold text-white flex items-center">
+                        <svg className="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Payment Completed
+                      </h4>
+                      <p className="text-slate-300 text-sm mt-1">Total: ₹{calculateTotal().toFixed(2)}</p>
+                    </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-          
-          {/* Section 3: Consent & Submit */}
-          <div className="bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-700/50">
-            <h2 className="text-3xl font-bold mb-6 text-white bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500">Consent & Submit</h2>
-            
-            <div className="mb-8">
-              <label className="flex items-start cursor-pointer space-x-3 p-4 rounded-xl bg-slate-800/70 backdrop-blur-sm border border-slate-700/70">
-                <input
-                  type="checkbox"
-                  className="mt-1 rounded border-slate-600 text-indigo-500 focus:ring-indigo-500 h-5 w-5"
-                  checked={consentGiven}
-                  onChange={(e) => setConsentGiven(e.target.checked)}
-                />
-                <span className="text-slate-200">
-                  I consent to verification and storing document hash on blockchain for secure, immutable record-keeping purposes. I understand this process helps maintain data integrity while protecting my privacy.
-                </span>
-              </label>
-            </div>
-            
-            <button
-              onClick={handleSubmit}
-              disabled={isSubmitting || submitSuccess}
-              className={`w-full py-4 px-6 rounded-xl flex items-center justify-center space-x-3 ${
-                isSubmitting || submitSuccess
-                  ? 'bg-slate-700 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-indigo-500/30'
-              } text-white font-medium text-lg transition-all duration-300`}
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Processing Verification...</span>
-                </>
-              ) : submitSuccess ? (
-                <>
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Verification Submitted Successfully</span>
-                </>
-              ) : (
-                <span>Submit Verification Request</span>
-              )}
-            </button>
-            
-            {submitError && (
-              <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400">
-                {submitError}
-              </div>
+                </div>
+                
+                {/* Consent Checkbox */}
+                <div className="mb-6">
+                  <div className="bg-slate-800/70 backdrop-blur-sm rounded-xl p-6 border border-slate-700/70">
+                    <h3 className="text-xl font-semibold text-indigo-300 mb-4">Consent</h3>
+                    <div className="flex items-start">
+                      <input
+                        type="checkbox"
+                        id="consent"
+                        checked={consentGiven}
+                        onChange={(e) => setConsentGiven(e.target.checked)}
+                        className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="consent" className="ml-2 block text-sm text-slate-300">
+                        I hereby confirm that all information provided is accurate and true to the best of my knowledge. 
+                        I authorize BlockVerify to verify this information with relevant authorities and share the verification results 
+                        with authorized parties. I understand that any false information may result in rejection of my verification request.
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Submit Error */}
+                {submitError && (
+                  <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-red-400">
+                    <div className="flex items-start">
+                      <svg className="w-5 h-5 text-red-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span>{submitError}</span>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Submit Button */}
+                <div className="flex justify-between items-center">
+                  <button
+                    onClick={() => setCurrentStep('payment_success')}
+                    className="py-2 px-4 rounded-xl bg-slate-700 hover:bg-slate-600 text-white transition-colors"
+                  >
+                    Back
+                  </button>
+                  
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!consentGiven || isSubmitting}
+                    className={`py-3 px-6 rounded-xl flex items-center shadow-lg ${
+                      !consentGiven || isSubmitting
+                        ? 'bg-slate-700 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 hover:shadow-green-500/30'
+                    } text-white font-medium transition-all duration-300`}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Submitting...
+                      </>
+                    ) : 'Submit Verification Request'}
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </motion.div>
