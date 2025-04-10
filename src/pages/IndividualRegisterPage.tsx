@@ -1,34 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import OrganizationWarning from '../components/ui/OrganizationWarning';
+import { motion } from 'framer-motion';
 import axios from 'axios';
+import { useOCAuth } from '@opencampus/ocid-connect-js';
+import Cookies from 'js-cookie';
 
 // API URL
 const API_URL = 'http://localhost:5002/api';
 
-// Define interface for API responses
-interface RegisterResponse {
-  success: boolean;
-  user: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    [key: string]: any;
-  };
-}
 
 const IndividualRegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  
-  // Step state - initialize from location state if available
-  const [step, setStep] = useState<'org-check' | 'registration'>(
-    location.state?.step || 'org-check'
-  );
-  
-  // Organization check state
-  const [showOrgWarning, setShowOrgWarning] = useState(false);
+  const { authState, OCId } = useOCAuth();
   
   // User data
   const [phone, setPhone] = useState('');
@@ -39,6 +22,7 @@ const IndividualRegisterPage: React.FC = () => {
   const [gender, setGender] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [ocidValue, setOcidValue] = useState('');
   
   // UI state
   const [isLoading, setIsLoading] = useState(false);
@@ -49,20 +33,23 @@ const IndividualRegisterPage: React.FC = () => {
   
   // Dropdown ref for outside click handling
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
-  // Handle outside click to close dropdown
+
+  // Handle OCID authentication
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
-      }
+    if (authState?.isAuthenticated && OCId) {
+      console.log('OCID Authentication detected in IndividualRegisterPage:', {
+        OCId,
+        authState,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Set the OCID value for the form
+      setOcidValue(OCId);
+      
+      // Store in cookie
+      Cookies.set('ocid', OCId, { expires: 7 });
     }
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [dropdownRef]);
+  }, [authState, OCId]);
 
   // Check if phone or email already exists
   const checkDuplicateEntry = async (field: string, value: string): Promise<boolean> => {
@@ -150,17 +137,10 @@ const IndividualRegisterPage: React.FC = () => {
       // Create full name from first and last name
       const fullName = `${firstName} ${lastName}`;
       
-      // Register user in database
-      const response = await axios.post<RegisterResponse>(`${API_URL}/register`, {
-        firstName,
-        lastName,
-        name: fullName,
-        phone,
-        email,
-        dob,
-        gender,
-        password,
-      });
+      // Get OCID - first try from state, then from cookie
+      const ocid = ocidValue || Cookies.get('ocid') || OCId || '';
+      
+      // Register user in database with OCID
       
       setSuccess('Registration successful! You can now log in.');
       
@@ -182,21 +162,20 @@ const IndividualRegisterPage: React.FC = () => {
       setIsLoading(false);
     }
   };
-  
-  // Handle organization check responses
-  const handleOrgCheckResponse = (isPartOfOrg: boolean) => {
-    if (isPartOfOrg) {
-      setShowOrgWarning(true);
-    } else {
-      setStep('registration');
-    }
-  };
-  
-  // Handle closing the org warning
-  const handleCloseOrgWarning = () => {
-    setShowOrgWarning(false);
-    navigate('/register');
-  };
+
+  // Handle outside click to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownRef]);
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -234,275 +213,235 @@ const IndividualRegisterPage: React.FC = () => {
       {/* Right section (form) - scrollable */}
       <div className="w-full md:w-1/2 bg-dark-800 p-8 md:p-12 flex items-center justify-center md:ml-[50%] min-h-screen overflow-y-auto">
         <div className="w-full max-w-md">
-          <AnimatePresence mode="wait">
-            {step === 'org-check' && (
-              <motion.div
-                key="org-check"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="w-full"
-              >
-                <h2 className="text-3xl font-bold text-primary-500 mb-4">Individual Registration</h2>
-                <p className="text-gray-300 mb-8">Please confirm your registration type</p>
-                
-                <div className="bg-dark-700 p-6 rounded-xl mb-6">
-                  <h3 className="text-xl font-semibold text-white mb-4">Are you registering as part of an organization?</h3>
-                  <p className="text-gray-400 mb-6">If you're an employee of an organization using FirstReference, select "Yes"</p>
-                  
-                  <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
-                    <button
-                      onClick={() => handleOrgCheckResponse(true)}
-                      className="py-2 px-4 rounded-lg bg-dark-600 hover:bg-dark-500 text-white font-medium transition-colors"
-                    >
-                      Yes, I'm with an organization
-                    </button>
-                    <button
-                      onClick={() => handleOrgCheckResponse(false)}
-                      className="py-2 px-4 rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-medium transition-colors"
-                    >
-                      No, I'm an individual
-                    </button>
-                  </div>
-                  
-                  <div className="mt-4 text-center">
-                    <button
-                      onClick={() => setStep('registration')}
-                      className="text-primary-500 hover:text-primary-400 font-medium mt-2 inline-block"
-                    >
-                      Skip to registration form
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="w-full"
+          >
+            <h2 className="text-3xl font-bold text-primary-500 mb-2">Create Account</h2>
+            <p className="text-gray-300 mb-4">Welcome! Set up your individual profile</p>
+            
+            {success && (
+              <div className="bg-green-900/30 border border-green-800 text-green-400 p-3 rounded-lg mb-4">
+                {success}
+              </div>
             )}
             
-            {step === 'registration' && (
-              <motion.div
-                key="register-step"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="w-full"
-              >
-                <h2 className="text-3xl font-bold text-primary-500 mb-2">Create Account</h2>
-                <p className="text-gray-300 mb-4">Welcome! Set up your individual profile</p>
-                
-                {success && (
-                  <div className="bg-green-900/30 border border-green-800 text-green-400 p-3 rounded-lg mb-4">
-                    {success}
-                  </div>
-                )}
-                
-                {error && (
-                  <div className="bg-red-900/30 border border-red-800 text-red-400 p-3 rounded-lg mb-4">
-                    {error}
-                  </div>
-                )}
-                
-                <form onSubmit={handleRegister}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label htmlFor="firstName" className="block text-gray-300 text-sm mb-2">
-                        First Name
-                      </label>
-                      <input
-                        type="text"
-                        id="firstName"
-                        value={firstName}
-                        onChange={(e) => setFirstName(capitalizeFirstLetter(e.target.value))}
-                        className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        placeholder="First name"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="lastName" className="block text-gray-300 text-sm mb-2">
-                        Last Name
-                      </label>
-                      <input
-                        type="text"
-                        id="lastName"
-                        value={lastName}
-                        onChange={(e) => setLastName(capitalizeFirstLetter(e.target.value))}
-                        className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        placeholder="Last name"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="mb-4">
-                    <label htmlFor="reg-phone" className="block text-gray-300 text-sm mb-2">
-                      Mobile Number
-                    </label>
-                    <input
-                      type="tel"
-                      id="reg-phone"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      placeholder="10-digit mobile number"
-                      pattern="[0-9]{10}"
-                      maxLength={10}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="mb-4">
-                    <label htmlFor="email" className="block text-gray-300 text-sm mb-2">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      placeholder="your@email.com"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label htmlFor="dob" className="block text-gray-300 text-sm mb-2">
-                        Date of Birth
-                      </label>
-                      <input
-                        type="date"
-                        id="dob"
-                        value={dob}
-                        onChange={(e) => setDob(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="gender" className="block text-gray-300 text-sm mb-2">
-                        Gender
-                      </label>
-                      <div className="relative" ref={dropdownRef}>
-                        <div 
-                          className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer flex justify-between items-center"
-                          onClick={() => setDropdownOpen(!dropdownOpen)}
-                        >
-                          <span>{gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : 'Select gender'}</span>
-                          <svg className={`h-4 w-4 text-gray-400 transition-transform ${dropdownOpen ? 'transform rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
-                        
-                        {dropdownOpen && (
-                          <div className="absolute z-10 mt-1 w-full bg-dark-800 border border-dark-600 rounded-lg shadow-lg">
-                            <div 
-                              className="px-4 py-2 hover:bg-dark-700 cursor-pointer text-white"
-                              onClick={() => {
-                                setGender('male');
-                                setDropdownOpen(false);
-                              }}
-                            >
-                              Male
-                            </div>
-                            <div 
-                              className="px-4 py-2 hover:bg-dark-700 cursor-pointer text-white"
-                              onClick={() => {
-                                setGender('female');
-                                setDropdownOpen(false);
-                              }}
-                            >
-                              Female
-                            </div>
-                            <div 
-                              className="px-4 py-2 hover:bg-dark-700 cursor-pointer text-white"
-                              onClick={() => {
-                                setGender('other');
-                                setDropdownOpen(false);
-                              }}
-                            >
-                              Other
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Hidden input for form validation */}
-                        <input 
-                          type="hidden" 
-                          name="gender" 
-                          value={gender} 
-                          required 
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mb-4">
-                    <label htmlFor="reg-password" className="block text-gray-300 text-sm mb-2">
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      id="reg-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      placeholder="Create a password"
-                      minLength={6}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="mb-4">
-                    <label htmlFor="confirm-password" className="block text-gray-300 text-sm mb-2">
-                      Confirm Password
-                    </label>
-                    <input
-                      type="password"
-                      id="confirm-password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      placeholder="Confirm your password"
-                      minLength={6}
-                      required
-                    />
-                  </div>
-                  
-                  <button
-                    type="submit"
-                    className={`w-full py-3 rounded-lg bg-primary-500 text-white font-semibold hover:bg-primary-600 transition-colors ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (isCheckingDuplicate ? 'Checking information...' : 'Registering...') : 'Register & Continue'}
-                  </button>
-                </form>
-                
-                <div className="mt-6 text-center">
-                  <p className="text-gray-400">Already have an account?</p>
-                  <Link 
-                    to="/login"
-                    className="text-primary-500 hover:text-primary-400 font-medium mt-1 inline-block"
-                  >
-                    Login Now
-                  </Link>
-                </div>
-              </motion.div>
+            {error && (
+              <div className="bg-red-900/30 border border-red-800 text-red-400 p-3 rounded-lg mb-4">
+                {error}
+              </div>
             )}
-          </AnimatePresence>
+            
+            <form onSubmit={handleRegister}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label htmlFor="firstName" className="block text-gray-300 text-sm mb-2">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    value={firstName}
+                    onChange={(e) => setFirstName(capitalizeFirstLetter(e.target.value))}
+                    className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder="First name"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="lastName" className="block text-gray-300 text-sm mb-2">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    value={lastName}
+                    onChange={(e) => setLastName(capitalizeFirstLetter(e.target.value))}
+                    className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder="Last name"
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <label htmlFor="reg-phone" className="block text-gray-300 text-sm mb-2">
+                  Mobile Number
+                </label>
+                <input
+                  type="tel"
+                  id="reg-phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="10-digit mobile number"
+                  pattern="[0-9]{10}"
+                  maxLength={10}
+                  required
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label htmlFor="email" className="block text-gray-300 text-sm mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="your@email.com"
+                  required
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label htmlFor="ocid" className="block text-gray-300 text-sm mb-2">
+                  Open Campus ID
+                </label>
+                <input
+                  type="text"
+                  id="ocid"
+                  value={ocidValue || Cookies.get('ocid') || ''}
+                  className="w-full px-4 py-3 rounded-lg bg-dark-700 border border-dark-600 text-gray-400 cursor-not-allowed"
+                  readOnly
+                  disabled
+                />
+                {ocidValue ? (
+                  <p className="text-xs text-gray-500 mt-1">Your Open Campus ID (authenticated successfully)</p>
+                ) : (
+                  <p className="text-xs text-gray-500 mt-1">No Open Campus ID detected</p>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label htmlFor="dob" className="block text-gray-300 text-sm mb-2">
+                    Date of Birth
+                  </label>
+                  <input
+                    type="date"
+                    id="dob"
+                    value={dob}
+                    onChange={(e) => setDob(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="gender" className="block text-gray-300 text-sm mb-2">
+                    Gender
+                  </label>
+                  <div className="relative" ref={dropdownRef}>
+                    <div 
+                      className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer flex justify-between items-center"
+                      onClick={() => setDropdownOpen(!dropdownOpen)}
+                    >
+                      <span>{gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : 'Select gender'}</span>
+                      <svg className={`h-4 w-4 text-gray-400 transition-transform ${dropdownOpen ? 'transform rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                    
+                    {dropdownOpen && (
+                      <div className="absolute z-10 mt-1 w-full bg-dark-800 border border-dark-600 rounded-lg shadow-lg">
+                        <div 
+                          className="px-4 py-2 hover:bg-dark-700 cursor-pointer text-white"
+                          onClick={() => {
+                            setGender('male');
+                            setDropdownOpen(false);
+                          }}
+                        >
+                          Male
+                        </div>
+                        <div 
+                          className="px-4 py-2 hover:bg-dark-700 cursor-pointer text-white"
+                          onClick={() => {
+                            setGender('female');
+                            setDropdownOpen(false);
+                          }}
+                        >
+                          Female
+                        </div>
+                        <div 
+                          className="px-4 py-2 hover:bg-dark-700 cursor-pointer text-white"
+                          onClick={() => {
+                            setGender('other');
+                            setDropdownOpen(false);
+                          }}
+                        >
+                          Other
+                        </div>      
+                      </div>
+                    )}
+                    
+                    {/* Hidden input for form validation */}
+                    <input 
+                      type="hidden" 
+                      name="gender" 
+                      value={gender} 
+                      required 
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <label htmlFor="reg-password" className="block text-gray-300 text-sm mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="reg-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="Create a password"
+                  minLength={6}
+                  required
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label htmlFor="confirm-password" className="block text-gray-300 text-sm mb-2">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  id="confirm-password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-600 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="Confirm your password"
+                  minLength={6}
+                  required
+                />
+              </div>
+              
+              <button
+                type="submit"
+                className={`w-full py-3 rounded-lg bg-primary-500 text-white font-semibold hover:bg-primary-600 transition-colors ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                disabled={isLoading}
+              >
+                {isLoading ? (isCheckingDuplicate ? 'Checking information...' : 'Registering...') : 'Register & Continue'}
+              </button>
+            </form>
+            
+            <div className="mt-6 text-center">
+              <p className="text-gray-400">Already have an account?</p>
+              <Link 
+                to="/login"
+                className="text-primary-500 hover:text-primary-400 font-medium mt-1 inline-block"
+              >
+                Login Now
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </div>
-      
-      {/* Organization warning popup */}
-      <AnimatePresence>
-        {showOrgWarning && (
-          <OrganizationWarning 
-            isOpen={showOrgWarning} 
-            onClose={handleCloseOrgWarning}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 };

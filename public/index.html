@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="First Reference - Secure Document Verification with Blockchain"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Error prevention script -->
+    <script>
+      // Create a safety element to prevent getAttribute errors
+      (function() {
+        try {
+          // Add a global error handler to catch and suppress specific errors
+          window.addEventListener('error', function(event) {
+            if (event && event.message && 
+                (event.message.includes('getAttribute') || 
+                 event.message.includes('filter_content') ||
+                 event.message.includes('WebSocket'))) {
+              // Prevent default error behavior for these specific errors
+              event.preventDefault();
+              console.warn('Suppressed error:', event.message);
+              return true;
+            }
+          }, true);
+          
+          // Create safety element for filter_content.js
+          document.addEventListener('DOMContentLoaded', function() {
+            var safetyElement = document.createElement('div');
+            safetyElement.id = 'filter-content-safety';
+            safetyElement.setAttribute('data-filter-content', 'true');
+            document.body.appendChild(safetyElement);
+            
+            // Also add safety attributes to body
+            document.body.setAttribute('data-filter-content', 'true');
+          });
+        } catch(e) {
+          console.warn('Error prevention script failed:', e);
+        }
+      })();
+    </script>
+    
+    <title>First Reference</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html> 
