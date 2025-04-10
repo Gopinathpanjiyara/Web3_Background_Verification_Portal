@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { LoginButton } from '@opencampus/ocid-connect-js';
 
 const OCIDAuthPage: React.FC = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const [connectionError, setConnectionError] = useState<string | null>(null);
-  const [pageLoaded, setPageLoaded] = useState(false);
   
   // Parse URL for error messages
   useEffect(() => {
@@ -19,11 +17,6 @@ const OCIDAuthPage: React.FC = () => {
 
   // Handle WebSocket and other errors
   useEffect(() => {
-    // Mark page as loaded after a delay
-    const loadTimer = setTimeout(() => {
-      setPageLoaded(true);
-    }, 1000);
-    
     // Global error handler to catch WebSocket errors
     const handleError = (event: ErrorEvent) => {
       console.error('Error detected:', event);
@@ -48,7 +41,6 @@ const OCIDAuthPage: React.FC = () => {
     
     return () => {
       window.removeEventListener('error', handleError);
-      clearTimeout(loadTimer);
     };
   }, []);
 
@@ -102,6 +94,15 @@ const OCIDAuthPage: React.FC = () => {
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-2 text-white">First Reference</h1>
           <p className="text-lg text-gray-200">Secure document verification with blockchain</p>
+          
+          <Link to="/register">
+            <button className="mt-8 bg-primary-600 hover:bg-primary-700 text-white py-3 px-8 rounded-lg inline-flex items-center transition-all shadow-lg">
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span>Back to Account Type</span>
+            </button>
+          </Link>
         </div>
       </div>
       
@@ -128,27 +129,17 @@ const OCIDAuthPage: React.FC = () => {
             </div>
           )}
           
-          {/* After page is loaded and no connection error, show WebSocket troubleshooting tips */}
-          {pageLoaded && !connectionError && (
-            <div className="bg-dark-700 p-4 rounded-lg mb-6 text-center text-gray-400 text-sm">
-              <p>If login button doesn't appear or errors occur, ensure your browser allows WebSocket connections.</p>
-              <p className="mt-1">Some browsers or corporate networks may block these connections.</p>
-            </div>
-          )}
-
           {/* Use the official OCID LoginButton component */}
           <div id="ocid-login-button-container" className="w-full flex justify-center">
             <LoginButton 
               pill={false}
               disabled={false}
-              theme={{
-                button: "w-full max-w-md py-3 mb-4 rounded-lg bg-dark-700 text-white font-semibold hover:bg-dark-600 transition-colors flex items-center justify-center relative"
-              }}
+              theme="dark"
             />
           </div>
           
           {/* Development mode notice */}
-          <div className="mt-4 text-center text-xs text-gray-500">
+          <div className="mt-4 text-center text-[10px] text-gray-500/60">
             <p>Development mode enabled: OCID authentication in sandbox mode</p>
           </div>
         </div>

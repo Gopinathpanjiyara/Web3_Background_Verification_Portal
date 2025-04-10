@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import axios from 'axios';
 import { useOCAuth } from '@opencampus/ocid-connect-js';
 import Cookies from 'js-cookie';
@@ -8,20 +8,9 @@ import Cookies from 'js-cookie';
 // API URL
 const API_URL = 'http://localhost:5002/api';
 
-// Define interface for API responses
-interface RegisterResponse {
-  success: boolean;
-  user: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    [key: string]: any;
-  };
-}
 
 const IndividualRegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { authState, OCId } = useOCAuth();
   
   // User data
@@ -152,17 +141,6 @@ const IndividualRegisterPage: React.FC = () => {
       const ocid = ocidValue || Cookies.get('ocid') || OCId || '';
       
       // Register user in database with OCID
-      const response = await axios.post<RegisterResponse>(`${API_URL}/register`, {
-        firstName,
-        lastName,
-        name: fullName,
-        phone,
-        email,
-        dob,
-        gender,
-        password,
-        ocid,
-      });
       
       setSuccess('Registration successful! You can now log in.');
       
