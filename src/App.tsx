@@ -114,6 +114,7 @@ function App() {
         <Route path="/verify" element={<VerifyDocument />} />
         <Route path="/verifier-login" element={<VerifierLoginPage />} />
         <Route path="/verifier/dashboard" element={<VerifierDashboard />} />
+        <Route path="/ocid-auth" element={<OCIDAuthPage />} />
           <Route 
             path="/redirect" 
             element={
